@@ -1,0 +1,143 @@
+<style>
+	/* Desktop View: Side-by-Side */
+	.game-area {
+		display: flex;
+		flex-direction: row;
+		gap: 20px;
+		align-items: flex-start;
+	}
+
+	.image-section,
+	.map-section {
+		flex: 1; /* Both take up 50% width */
+	}
+
+	#target-photo {
+		width: 100%;
+		height: auto;
+		border-radius: 8px;
+	}
+
+	#map {
+		height: 400px;
+		width: 100%;
+		border: 2px solid #ccc;
+	}
+
+	/* Mobile View: Stacked */
+	@media (max-width: 768px) {
+		.game-area {
+			flex-direction: column; /* Stack vertically */
+		}
+
+		#map {
+			height: 300px; /* Slightly smaller map for phones */
+		}
+	}
+</style>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<div id="game-area">
+	<div class="image-section">
+		<h3>Where was this photo taken?</h3>
+		<img
+			src="%image%"
+			id="target-photo"
+			style="
+				width: 100%;
+				max-height: 300px;
+				object-fit: cover;
+				border-radius: 8px;
+				margin-bottom: 10px;
+			"
+		/>
+	</div>
+
+	<div class="map-section">
+		<div id="map" style="height: 400px; width: 100%; background: #aad3df"></div>
+		<p>Selected Country: <strong id="selection-display">None</strong></p>
+		<button
+			type="button"
+			id="submit-btn"
+			style="padding: 10px 20px; cursor: pointer"
+		>
+			Submit Guess
+		</button>
+	</div>
+</div>
+
+<script>
+	// 1. SET THE TARGET
+	const targetCountry = "%answer%";
+    const roundNumber = "%roundNum%";
+    const variableID = "G101_0" + roundNumber;
+
+	let selectedCountry = "";
+	let geoLayer;
+
+	// 2. INITIALIZE MAP
+	const map = L.map("map").setView([20, 0], 2);
+
+	// 3. LOAD COUNTRY BORDERS (GeoJSON)
+	// We fetch a standard low-res world map GeoJSON
+	fetch(
+		"https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson",
+	)
+		.then((response) => response.json())
+		.then((data) => {
+			geoLayer = L.geoJson(data, {
+				style: { color: "#666", weight: 1, fillOpacity: 0.2 },
+				onEachFeature: function (feature, layer) {
+					layer.on("click", function (e) {
+						// Reset style
+						geoLayer.resetStyle();
+
+						console.log("Country Data:", feature.properties);
+
+						// Set selection
+						selectedCountry =
+							feature.properties.ADMIN ||
+							feature.properties.name ||
+							feature.properties.NAME;
+						document.getElementById("selection-display").innerText =
+							selectedCountry;
+
+						// Highlight selected country
+
+						layer.setStyle({ fillOpacity: 0.7, fillColor: "#ffcc00" });
+					});
+				},
+			}).addTo(map);
+		});
+
+	// 4. SUBMIT LOGIC
+	document.getElementById("submit-btn").addEventListener("click", function () {
+		if (!selectedCountry) {
+			alert("Please select a country first!");
+			return;
+		}
+
+		// Determine if correct
+		const isCorrect = selectedCountry === targetCountry ? 1 : 0;
+
+		// SAVE TO SOSCI (Assuming GG01_01 is your internal variable)
+		document.getElementById(variableID).value = isCorrect;
+
+		// Optional Feedback
+		if (isCorrect) {
+			alert("Correct! It was " + targetCountry);
+		} else {
+			alert(
+				"Wrong. You picked " +
+					selectedCountry +
+					", but it was " +
+					targetCountry,
+			);
+		}
+
+		// Move to next page
+		// SoSciTools.submitPage();
+	});
+</script>
