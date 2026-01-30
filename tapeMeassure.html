@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Blind Tape Measure Game</title>
+    <style>
+        /* Basic reset for the demo */
+        body { font-family: sans-serif; padding: 20px; }
+
+        /* --- GAME CSS START (Copy to SoSci Survey) --- */
+        #game-wrapper {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .instructions {
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        .highlight {
+            font-weight: bold;
+            color: #d35400;
+            font-size: 1.2em;
+        }
+
+        /* Container for the tape logic */
+        .tape-container {
+            position: relative;
+            height: 80px;
+            background: #f4f4f4;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            /* Prevent text selection while dragging */
+            user-select: none; 
+            touch-action: none;
+        }
+
+        /* The plastic housing on the left */
+        .tape-housing {
+            position: absolute;
+            left: 10px;
+            top: 10px;
+            width: 60px;
+            height: 60px;
+            background: #e67e22; /* Housing color */
+            border-radius: 8px;
+            z-index: 10;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        /* The yellow tape itself */
+        .tape-strip {
+            position: absolute;
+            left: 60px; /* Starts inside housing */
+            top: 25px;
+            height: 30px;
+            width: 0px; /* Initial length */
+            background-color: #f1c40f;
+            border-top: 1px solid #cfaa08;
+            border-bottom: 1px solid #cfaa08;
+            z-index: 5;
+            
+            /* CSS Pattern for tick marks without numbers */
+            background-image: 
+                linear-gradient(90deg, #333 1px, transparent 1px),
+                linear-gradient(90deg, #333 1px, transparent 1px);
+            background-size: 10px 100%, 100px 100%; /* Small ticks every 10px, big every 100px */
+            background-position: 0 bottom, 0 bottom;
+            background-repeat: repeat-x;
+        }
+
+        /* The handle you drag */
+        .tape-handle {
+            position: absolute;
+            left: 60px; /* Matches tape-strip start */
+            top: 15px;
+            width: 20px;
+            height: 50px;
+            background: #333;
+            border-radius: 4px;
+            cursor: col-resize;
+            z-index: 15;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+        
+        .tape-handle:hover {
+            background: #555;
+        }
+
+        .debug-info {
+            margin-top: 20px;
+            color: #666;
+            font-size: 0.9em;
+            text-align: center;
+        }
+        /* --- GAME CSS END --- */
+    </style>
+</head>
+<body>
+
+    <!-- --- GAME HTML START (Copy to SoSci Survey "Text" Element) --- -->
+    <div id="game-wrapper">
+        <div class="instructions">
+            Please pull the tape measure blindly to exactly: <br>
+            <span class="highlight" id="target-value">25 cm</span>
+        </div>
+
+        <div class="tape-container" id="tape-interaction-area">
+            <div class="tape-housing"></div>
+            <div class="tape-strip" id="tape-strip"></div>
+            <div class="tape-handle" id="tape-handle"></div>
+        </div>
+        
+        <!-- Optional: Visual feedback button (SoSci usually relies on the 'Next' button) -->
+        <div style="text-align: center;">
+            <button type="button" id="check-btn" style="padding: 10px 20px;">Check Length (Debug)</button>
+        </div>
+
+        <div class="debug-info">
+            Current simulated value: <span id="debug-val">0</span> cm
+        </div>
+    </div>
+
+    <script>
+        // --- GAME JS START (Copy to SoSci Survey) ---
+        
+        // 1. CONFIGURATION
+        // =================
+        // Replace 'IV01_01' with your actual Internal Variable ID from SoSci Survey
+        const internalVarID = "IV01_01"; 
+        
+        // Calibration: How many pixels represent 1 cm on screen? 
+        // Defaulting to ~38px per cm (rough estimate for monitors), 
+        // but for a game "blind pull", maybe 10px = 1 unit is simpler mechanics.
+        // Let's use 10px = 1cm for simplicity of the visual "game" aspect.
+        const pixelsPerCm = 15; 
+        
+        // Max length of tape in cm
+        const maxCm = 50; 
+
+        // 2. LOGIC
+        // ========
+        (function() {
+            const handle = document.getElementById('tape-handle');
+            const tape = document.getElementById('tape-strip');
+            const container = document.getElementById('tape-interaction-area');
+            const debugDisplay = document.getElementById('debug-val');
+            
+            // Get the SoSci hidden input (if it exists)
+            const soSciInput = document.getElementById(internalVarID);
+
+            let isDragging = false;
+            let startX = 0;
+            let startLeftPixels = 0;
+            
+            // Housing offset determines where the "zero" point is
+            // Housing is 60px wide, handle starts at 60px
+            const zeroOffset = 60; 
+
+            // Initialize position
+            function updatePosition(pixelOffset) {
+                // Bounds checking
+                const maxPixels = (maxCm * pixelsPerCm);
+                const containerWidth = container.offsetWidth;
+                
+                // Limit by logic or screen width
+                let validPixels = Math.max(0, pixelOffset);
+                validPixels = Math.min(validPixels, maxPixels);
+                
+                // Also limit so handle doesn't fly off screen
+                if (zeroOffset + validPixels + handle.offsetWidth > containerWidth) {
+                    validPixels = containerWidth - zeroOffset - handle.offsetWidth;
+                }
+
+                // Apply to DOM
+                handle.style.left = (zeroOffset + validPixels) + 'px';
+                tape.style.width = validPixels + 'px';
+
+                // Calculate cm
+                const currentCm = (validPixels / pixelsPerCm).toFixed(2);
+                
+                // Update Debug UI
+                if(debugDisplay) debugDisplay.textContent = currentCm;
+
+                // Update SoSci Variable
+                if (soSciInput) {
+                    soSciInput.value = currentCm;
+                }
+            }
+
+            // Mouse Events
+            handle.addEventListener('mousedown', function(e) {
+                isDragging = true;
+                startX = e.clientX;
+                startLeftPixels = parseInt(handle.style.left || zeroOffset) - zeroOffset;
+                e.preventDefault(); // Stop selection
+            });
+
+            document.addEventListener('mouseup', function() {
+                isDragging = false;
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                const delta = e.clientX - startX;
+                updatePosition(startLeftPixels + delta);
+            });
+
+            // Touch Events (Mobile)
+            handle.addEventListener('touchstart', function(e) {
+                isDragging = true;
+                startX = e.touches[0].clientX;
+                startLeftPixels = parseInt(handle.style.left || zeroOffset) - zeroOffset;
+                e.preventDefault(); 
+            }, {passive: false});
+
+            document.addEventListener('touchend', function() {
+                isDragging = false;
+            });
+
+            document.addEventListener('touchmove', function(e) {
+                if (!isDragging) return;
+                const delta = e.touches[0].clientX - startX;
+                updatePosition(startLeftPixels + delta);
+            }, {passive: false});
+            
+            // Debug button logic
+            document.getElementById('check-btn').addEventListener('click', function() {
+                alert("Current value: " + (soSciInput ? soSciInput.value : document.getElementById('debug-val').textContent));
+            });
+
+        })();
+        // --- GAME JS END ---
+    </script>
+</body>
+</html>

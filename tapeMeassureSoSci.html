@@ -1,0 +1,195 @@
+<style>
+	/* --- STYLES --- */
+	#game-wrapper {
+		max-width: 100%; /* Changed to fit screen width */
+		margin: 20px 0;
+		padding: 20px;
+		background: #f9f9f9;
+		border: 1px solid #ddd;
+		border-radius: 8px;
+		font-family: Arial, sans-serif;
+		overflow: visible; /* Allow handle to go outside visually if needed */
+	}
+
+	.tape-container {
+		position: relative;
+		height: 80px;
+		background: #eee;
+		border: 1px solid #bbb;
+		border-radius: 4px;
+		margin-top: 20px;
+		user-select: none; /* Crucial for dragging */
+		touch-action: none; /* Crucial for mobile */
+		overflow: hidden; /* 1. Ensure visuals stay inside the box */
+	}
+
+	/* The plastic housing */
+	.tape-housing {
+		position: absolute;
+		left: 0;
+		top: 10px;
+		width: 60px;
+		height: 60px;
+		background: #e67e22;
+		border-radius: 0 4px 4px 0;
+		z-index: 10;
+	}
+
+	/* The yellow tape */
+	.tape-strip {
+		position: absolute;
+		left: 60px;
+		top: 25px;
+		height: 30px;
+		width: 0px;
+		background-color: #f1c40f;
+		border: 1px solid #cfaa08;
+		z-index: 5;
+		
+		/* --- NEW REALISTIC RULER PATTERN --- */
+		/* Layer 1: CM marks (Longest, Black) */
+		/* Layer 2: 0.5 CM marks (Medium, Dark Grey) */
+		/* Layer 3: MM marks (Shortest, Light Grey) */
+		background-image: 
+			linear-gradient(90deg, #000 2px, transparent 2px),
+			linear-gradient(90deg, #333 1px, transparent 1px),
+			linear-gradient(90deg, #666 1px, transparent 1px);
+        
+        /* Sizing matches CSS physical units */
+        background-size: 
+            1cm 100%,      /* 1cm repeat */
+            0.5cm 60%,     /* 0.5cm repeat */
+            0.1cm 30%;     /* 1mm repeat */
+            
+        background-repeat: repeat-x;
+        background-position: bottom left;
+	}
+
+	/* The drag handle */
+	.tape-handle {
+		position: absolute;
+		left: 60px;
+		top: 15px;
+		width: 20px;
+		height: 50px;
+		background: #444;
+		border-radius: 4px;
+		cursor: col-resize;
+		z-index: 15;
+	}
+
+	/* Hide the Internal Variable input field provided by SoSci */
+	/* Replace 'IV01_01' below if your variable ID is different */
+	#G103_01 {
+		display: none;
+	}
+</style>
+
+<div id="game-wrapper">
+	<div style="font-size: 18px; margin-bottom: 15px">
+		Please pull the tape measure blindly to exactly: <b>25 cm</b>
+	</div>
+
+	<div class="tape-container" id="tape-interaction-area">
+		<div class="tape-housing"></div>
+		<div class="tape-strip" id="tape-strip"></div>
+		<div class="tape-handle" id="tape-handle"></div>
+	</div>
+</div>
+
+<script>
+	(function () {
+		// --- CONFIGURATION ---
+		// CHANGE THIS to your actual Internal Variable ID!
+		const internalVarID = "G103_01";
+
+		// --- NEW DYNAMIC CALIBRATION ---
+		// We create a temporary 1cm element to see how many pixels the browser uses for it.
+		// Standard is usually ~37.8px on most screens unless zoomed.
+		function getPixelsPerCm() {
+			const div = document.createElement("div");
+			div.style.width = "1cm";
+			div.style.visibility = "hidden";
+			document.body.appendChild(div);
+			const px = div.offsetWidth;
+			document.body.removeChild(div);
+			return px;
+		}
+
+		console.log("Calculated px/cm:", getPixelsPerCm());
+		
+		const pixelsPerCm = getPixelsPerCm();
+		const maxCm = 50;
+		// ---------------------
+
+		const handle = document.getElementById("tape-handle");
+		const tape = document.getElementById("tape-strip");
+		const container = document.getElementById("tape-interaction-area"); // Select container
+
+		// Use the native SoSci input
+		const soSciInput = document.getElementById(internalVarID);
+
+		let isDragging = false;
+		let startX = 0;
+		let startLeft = 0;
+		const zeroOffset = 60; // Housing width
+
+		function update(pageX) {
+			if (!isDragging) return;
+			const delta = pageX - startX;
+			let newPixels = startLeft + delta;
+
+			// 2. Calculate dynamic limit based on container width
+			// Container width - Housing (60px) - Handle width (20px)
+			const containerLimit = container.offsetWidth - 60 - 20;
+
+			// Limits
+            if (newPixels < 0) newPixels = 0;
+            
+            // Stop at 50cm OR the visual edge, whichever comes first
+            const actualMax = Math.min(maxCm * pixelsPerCm, containerLimit);
+            
+            if (newPixels > actualMax) newPixels = actualMax;
+
+			// Update Visuals
+			handle.style.left = zeroOffset + newPixels + "px";
+			tape.style.width = newPixels + "px";
+
+			// Save Data to SoSci Variable
+			if (soSciInput) {
+				// We still divide by our dynamic pixelsPerCm to get accurate CM value
+				let cm = (newPixels / pixelsPerCm).toFixed(2);
+				console.log(cm);
+				soSciInput.value = cm;
+			}
+		}
+
+		// Mouse Events
+		handle.addEventListener("mousedown", function (e) {
+			isDragging = true;
+			startX = e.pageX;
+			startLeft = (parseInt(handle.style.left) || zeroOffset) - zeroOffset;
+			e.preventDefault();
+		});
+
+		document.addEventListener("mouseup", () => (isDragging = false));
+		document.addEventListener("mousemove", (e) => update(e.pageX));
+
+		// Touch Events (Mobile support)
+		handle.addEventListener(
+			"touchstart",
+			function (e) {
+				isDragging = true;
+				startX = e.touches[0].pageX;
+				startLeft = (parseInt(handle.style.left) || zeroOffset) - zeroOffset;
+				e.preventDefault();
+			},
+			{ passive: false },
+		);
+
+		document.addEventListener("touchend", () => (isDragging = false));
+		document.addEventListener("touchmove", (e) => update(e.touches[0].pageX), {
+			passive: false,
+		});
+	})();
+</script>

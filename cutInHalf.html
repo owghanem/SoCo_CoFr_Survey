@@ -1,0 +1,227 @@
+<!-- 1. The Container for the Game -->
+<div style="text-align: center; margin: 20px 0;">
+    <!-- The canvas needs touch-action: none to prevent scrolling while playing on mobile -->
+    <canvas id="cutGameCanvas" width="400" height="400" style="border: 1px solid #ccc; touch-action: none; background-color: #f9f9f9;"></canvas>
+    <div style="margin-top:10px;">
+        <p style="font-family: sans-serif;">Draw a line to cut the object in half!</p>
+        <button type="button" id="resetBtn" style="padding: 5px 15px; font-size: 14px; cursor: pointer;">Reset Try</button>
+    </div>
+</div>
+
+<!-- 2. Hidden Input for SoSci Survey -->
+<!-- IMPORTANT: Change 'IV01_01' to your actual SoSci Internal Variable ID -->
+<input type="hidden" name="IV01_01" id="resultInput" value="">
+
+<script>
+(function() {
+    // --- Configuration ---
+    // If you upload an image to SoSci Survey, put the filename here (e.g., "pretzel.png")
+    // If this is empty or the image fails, it will draw the shape via code.
+    const IMAGE_FILENAME = "cello.jpg"; 
+    
+    // --- Setup ---
+    const canvas = document.getElementById('cutGameCanvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const resultInput = document.getElementById('resultInput');
+    
+    // An invisible canvas to hold the "clean" object (without the red cut line)
+    // This is used for checking pixels efficiently.
+    const objectCanvas = document.createElement('canvas');
+    objectCanvas.width = canvas.width;
+    objectCanvas.height = canvas.height;
+    const objectCtx = objectCanvas.getContext('2d');
+
+    // Game State
+    let isDrawing = false;
+    let startPoint = null;
+    let endPoint = null;
+    let imageLoaded = false;
+
+    // --- Initialization ---
+    initGame();
+
+    function initGame() {
+        if (IMAGE_FILENAME !== "") {
+            const img = new Image();
+            // In SoSci, uploaded images are usually in the same directory or a specific path
+            img.src = IMAGE_FILENAME; 
+            img.onload = () => {
+                // Draw image centered
+                const scale = Math.min(300 / img.width, 300 / img.height);
+                const w = img.width * scale;
+                const h = img.height * scale;
+                objectCtx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
+                imageLoaded = true;
+                drawScene();
+            };
+            img.onerror = () => {
+                console.log("Image not found, falling back to drawn shape.");
+                drawFallbackShape();
+            };
+        } else {
+            drawFallbackShape();
+        }
+    }
+
+    function drawFallbackShape() {
+        // Draw a Pretzel-like shape using code
+        objectCtx.fillStyle = '#D2691E'; // Pretzel brown
+        
+        // Two top loops
+        objectCtx.beginPath();
+        objectCtx.arc(140, 180, 55, 0, 2 * Math.PI); 
+        objectCtx.arc(260, 180, 55, 0, 2 * Math.PI); 
+        objectCtx.fill();
+        
+        // Bottom curve
+        objectCtx.beginPath();
+        objectCtx.ellipse(200, 220, 100, 70, 0, 0, Math.PI); 
+        objectCtx.fill();
+        
+        // Punch holes ("destination-out" removes pixels)
+        objectCtx.globalCompositeOperation = 'destination-out';
+        objectCtx.beginPath();
+        objectCtx.arc(140, 180, 25, 0, 2 * Math.PI);
+        objectCtx.fill();
+        objectCtx.beginPath();
+        objectCtx.arc(260, 180, 25, 0, 2 * Math.PI);
+        objectCtx.fill();
+        
+        // Reset to normal drawing mode
+        objectCtx.globalCompositeOperation = 'source-over'; 
+        imageLoaded = true;
+        drawScene();
+    }
+
+    // --- Interaction Handlers ---
+    canvas.addEventListener('mousedown', startCut);
+    canvas.addEventListener('mousemove', moveCut);
+    canvas.addEventListener('mouseup', endCut);
+    // Touch events for mobile/tablet support
+    canvas.addEventListener('touchstart', (e) => startCut(getTouchPos(e)));
+    canvas.addEventListener('touchmove', (e) => moveCut(getTouchPos(e)));
+    canvas.addEventListener('touchend', (e) => endCut());
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        startPoint = null; 
+        endPoint = null;
+        if(resultInput) resultInput.value = ""; // clear stored data
+        drawScene();
+    });
+
+    function getTouchPos(e) {
+        if(e.cancelable) e.preventDefault(); 
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        return { offsetX: touch.clientX - rect.left, offsetY: touch.clientY - rect.top };
+    }
+
+    function startCut(e) {
+        if (endPoint) return; // cut already made
+        const pos = e.offsetX ? e : e; // normalize mouse vs manual obj
+        isDrawing = true;
+        startPoint = { x: pos.offsetX, y: pos.offsetY };
+    }
+
+    function moveCut(e) {
+        if (!isDrawing) return;
+        const pos = e.offsetX ? e : e;
+        endPoint = { x: pos.offsetX, y: pos.offsetY };
+        drawScene();
+    }
+
+    function endCut() {
+        if (!isDrawing) return;
+        isDrawing = false;
+        calculatePixelScore(); 
+    }
+
+    // --- Drawing Logic ---
+    function drawScene() {
+        // Clear visible canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // 1. Draw the clean object from offscreen canvas
+        if (imageLoaded) {
+            ctx.drawImage(objectCanvas, 0, 0);
+        }
+
+        // 2. Draw the RED Cut Line on top
+        if (startPoint && endPoint) {
+            ctx.strokeStyle = '#e74c3c';
+            ctx.lineWidth = 4;
+            ctx.setLineDash([10, 5]); 
+            ctx.beginPath();
+            ctx.moveTo(startPoint.x, startPoint.y);
+            ctx.lineTo(endPoint.x, endPoint.y);
+            ctx.stroke();
+            ctx.setLineDash([]); 
+        }
+    }
+
+    // --- ALGORITHM: Pixel Counting ---
+    function calculatePixelScore() {
+        if (!startPoint || !endPoint) return;
+
+        // 1. Get raw pixel data of the OBJECT ONLY
+        const imageData = objectCtx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+
+        // 2. Line equation geometry (Ax + By + C = 0)
+        const x1 = startPoint.x, y1 = startPoint.y;
+        const x2 = endPoint.x, y2 = endPoint.y;
+        const A = y1 - y2;
+        const B = x2 - x1;
+        const C = (x1 * y2) - (x2 * y1);
+
+        let pixelsSide1 = 0;
+        let pixelsSide2 = 0;
+
+        // 3. Loop through every pixel
+        for (let y = 0; y < canvas.height; y++) {
+            for (let x = 0; x < canvas.width; x++) {
+                // Index maps x,y to flat array [r, g, b, alpha, r, g, b, alpha...]
+                const index = (y * canvas.width + x) * 4;
+                const alpha = data[index + 3];
+
+                // If pixel is visible
+                if (alpha > 50) { 
+                    // Calculate which side of line: result > 0 is side 1, result < 0 is side 2
+                    const val = (A * x) + (B * y) + C;
+                    if (val > 0) pixelsSide1++;
+                    else pixelsSide2++;
+                }
+            }
+        }
+
+        const totalPixels = pixelsSide1 + pixelsSide2;
+        if (totalPixels === 0) return; // Cut completely missed object
+
+        // 4. Calculate Percentage
+        const portion1 = pixelsSide1 / totalPixels; // e.g. 0.60
+        const portion2 = pixelsSide2 / totalPixels; // e.g. 0.40
+        
+        // We want the score to be 100 if the split is 0.50 / 0.50
+        // We take the smaller portion (max possible value is 0.5)
+        const smallerPortion = Math.min(portion1, portion2);
+        
+        // Examples:
+        // Split 0.5/0.5 -> smaller 0.5 -> (0.5/0.5)*100 = 100 Score
+        // Split 0.4/0.6 -> smaller 0.4 -> (0.4/0.5)*100 = 80 Score
+        // Split 0.0/1.0 -> smaller 0.0 -> (0.0/0.5)*100 = 0 Score
+        const accuracy = Math.round((smallerPortion / 0.5) * 100);
+
+        // 5. Save to SoSci Variables
+        console.log(`Split: ${Math.round(portion1*100)}/${Math.round(portion2*100)}, Score: ${accuracy}`);
+        
+        if(resultInput) {
+            resultInput.value = portion1;
+        }
+
+        // 6. Draw Feedback on screen
+        ctx.fillStyle = "black";
+        ctx.font = "bold 18px Arial";
+        ctx.fillText(`Accuracy: ${portion1}%`, 10, 30);
+    }
+})();
+</script>
