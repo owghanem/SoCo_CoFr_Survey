@@ -10,14 +10,21 @@
 
 <!-- 2. Hidden Input for SoSci Survey -->
 <!-- IMPORTANT: Change 'IV01_01' to your actual SoSci Internal Variable ID -->
-<input type="hidden" name="IV01_01" id="resultInput" value="">
+<input type="hidden" name="%var%" id="resultInput" value="">
 
 <script>
-(function() {
+    (function() {
+    window.addEventListener("load", function() {
+        let nextButton = document.getElementById("submit0");
+        if (nextButton) {
+            nextButton.disabled = true; 
+        }
+    });
+
     // --- Configuration ---
     // If you upload an image to SoSci Survey, put the filename here (e.g., "pretzel.png")
     // If this is empty or the image fails, it will draw the shape via code.
-    const IMAGE_FILENAME = "cello.jpg"; 
+    const IMAGE_FILENAME = "%img%"; 
     
     // --- Setup ---
     const canvas = document.getElementById('cutGameCanvas');
@@ -107,6 +114,7 @@
         endPoint = null;
         if(resultInput) resultInput.value = ""; // clear stored data
         drawScene();
+        document.getElementById("submit0").disabled = true; // disable submit until next cut
     });
 
     function getTouchPos(e) {
@@ -133,7 +141,10 @@
     function endCut() {
         if (!isDrawing) return;
         isDrawing = false;
-        calculatePixelScore(); 
+        calculatePixelScore();
+        if(resultInput) {
+            document.getElementById("submit0").disabled = false;
+        }
     }
 
     // --- Drawing Logic ---
@@ -217,11 +228,6 @@
         if(resultInput) {
             resultInput.value = portion1;
         }
-
-        // 6. Draw Feedback on screen
-        ctx.fillStyle = "black";
-        ctx.font = "bold 18px Arial";
-        ctx.fillText(`Accuracy: ${portion1}%`, 10, 30);
     }
 })();
 </script>

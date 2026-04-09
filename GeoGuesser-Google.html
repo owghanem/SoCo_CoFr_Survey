@@ -1,0 +1,189 @@
+<style>
+    .game-area {
+        display: flex;
+        flex-direction: row;
+        gap: 20px;
+        align-items: flex-start;
+    }
+
+    .image-section,
+    .map-section {
+        flex: 1;
+    }
+
+    #street-view {
+        width: 100%;
+        height: 400px;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    #map {
+        height: 400px;
+        width: 100%;
+        border: 2px solid #ccc;
+    }
+
+    @media (max-width: 768px) {
+        .game-area {
+            flex-direction: column;
+        }
+
+        #street-view,
+        #map {
+            height: 300px;
+        }
+    }
+</style>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<!-- ✅ Fixed: added class="game-area" so CSS actually applies -->
+<div id="game-area" class="game-area">
+    <div class="image-section">
+        <h3>Where was this photo taken?</h3>
+        <div id="street-view"></div>
+    </div>
+
+    <div class="map-section">
+        <div id="map" style="height: 400px; width: 100%; background: #aad3df"></div>
+        <p>Selected Country: <strong id="selection-display">None</strong></p>
+    </div>
+</div>
+
+<script>
+    // ── Street View ────────────────────────────────────────────────
+    function initStreetView() {
+        // Option A: use lat/lng from SoSci variables
+        const lat = parseFloat("%lat%");
+        const lng = parseFloat("%lng%");
+
+        const streetViewEl = document.getElementById("street-view");
+
+        const panorama = new google.maps.StreetViewPanorama(
+            streetViewEl,
+            {
+                position: { lat, lng },
+                pov: { heading: 0, pitch: 0 },
+                zoom: 1,
+                addressControl: false,     // hide address overlay (gives away location)
+                showRoadLabels: false,     // hide road name labels
+                fullscreenControl: true,
+                motionTracking: false,
+                motionTrackingControl: false,
+                linksControl: false,        // allow moving through streets
+                clickToGo: false,
+                keyboardShortcuts: false
+            }
+        );
+
+        // ✅ Block keyboard navigation — useCapture: true intercepts
+        // events BEFORE Google Maps internal handlers receive them
+        const blockedKeys = [
+            "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight",
+            "PageUp", "PageDown",
+            "w", "a", "s", "d",   // WASD movement
+            "W", "A", "S", "D",
+        ];
+
+        streetViewEl.addEventListener(
+            "keydown",
+            function (e) {
+                if (blockedKeys.includes(e.key)) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            },
+            true  // ← capture phase, critical for this to work
+        );
+
+
+        // Safety net: snap back if navigation still somehow occurs
+        let originalPano = null;
+
+        google.maps.event.addListenerOnce(panorama, "tilesloaded", function () {
+            originalPano = panorama.getPano();
+        });
+
+        panorama.addListener("pano_changed", function () {
+            if (originalPano && panorama.getPano() !== originalPano) {
+                panorama.setPano(originalPano);
+            }
+        });
+
+    }
+
+    // Dynamically load the Google Maps API
+    (function () {
+        const script = document.createElement("script");
+        script.src =
+            "https://maps.googleapis.com/maps/api/js" +
+            "?key=" + "%api_key%" +
+            "&callback=initStreetView";
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+    })();
+
+    // ── SoSci / Game Logic ─────────────────────────────────────────
+    window.addEventListener("load", function () {
+        const nextButton = document.getElementById("submit0");
+        if (nextButton) nextButton.disabled = true;
+    });
+
+    const targetCountry = "%answer%";
+    const variableID = "%var%";
+
+    let selectedCountry = "";
+    let geoLayer;
+
+    const map = L.map("map").setView([20, 0], 2);
+
+    fetch(
+        "https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson"
+    )
+        .then((response) => response.json())
+        .then((data) => {
+            geoLayer = L.geoJson(data, {
+                style: { color: "#666", weight: 1, fillOpacity: 0.2 },
+                onEachFeature: function (feature, layer) {
+                    layer.on("click", function () {
+                        geoLayer.resetStyle();
+
+                        selectedCountry =
+                            feature.properties.ADMIN ||
+                            feature.properties.name ||
+                            feature.properties.NAME;
+
+                        document.getElementById(
+                            "selection-display"
+                        ).innerText = selectedCountry;
+
+                        layer.setStyle({
+                            fillOpacity: 0.7,
+                            fillColor: "#ffcc00",
+                        });
+
+                        const isCorrect =
+                            selectedCountry.trim().toLowerCase() ===
+                                targetCountry.trim().toLowerCase()
+                                ? 1
+                                : 0;
+
+                        console.log(
+                            "Selected:", selectedCountry,
+                            "Target:", targetCountry,
+                            "Correct?", isCorrect
+                        );
+
+                        const varElement = document.getElementById(variableID);
+                        if (varElement) varElement.value = isCorrect;
+
+                        const nextButton = document.getElementById("submit0");
+                        if (nextButton) nextButton.disabled = false;
+                    });
+                },
+            }).addTo(map);
+        });
+</script>

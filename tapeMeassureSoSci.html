@@ -80,14 +80,14 @@
 
 	/* Hide the Internal Variable input field provided by SoSci */
 	/* Replace 'IV01_01' below if your variable ID is different */
-	#G103_01 {
+	#%var% {
 		display: none;
 	}
 </style>
 
 <div id="game-wrapper">
 	<div style="font-size: 18px; margin-bottom: 15px">
-		Please pull the tape measure blindly to exactly: <b>25 cm</b>
+		Please pull the tape measure to exactly: <b>%goal% cm</b>
 	</div>
 
 	<div class="tape-container" id="tape-interaction-area">
@@ -99,9 +99,17 @@
 
 <script>
 	(function () {
+		// Wait for the page to load, then disable the Next button
+		window.addEventListener("load", function() {
+			let nextButton = document.getElementById("submit0");
+			if (nextButton) {
+				nextButton.disabled = true; 
+			}
+		});
+
 		// --- CONFIGURATION ---
 		// CHANGE THIS to your actual Internal Variable ID!
-		const internalVarID = "G103_01";
+		const internalVarID = "%var%";
 
 		// --- NEW DYNAMIC CALIBRATION ---
 		// We create a temporary 1cm element to see how many pixels the browser uses for it.
@@ -119,7 +127,7 @@
 		console.log("Calculated px/cm:", getPixelsPerCm());
 		
 		const pixelsPerCm = getPixelsPerCm();
-		const maxCm = 50;
+		const maxCm = parseFloat("%maxCm%") || 50; // Default to 50cm if not set
 		// ---------------------
 
 		const handle = document.getElementById("tape-handle");
@@ -161,6 +169,8 @@
 				let cm = (newPixels / pixelsPerCm).toFixed(2);
 				console.log(cm);
 				soSciInput.value = cm;
+
+				document.getElementById("submit0").disabled = false;
 			}
 		}
 
@@ -191,5 +201,8 @@
 		document.addEventListener("touchmove", (e) => update(e.touches[0].pageX), {
 			passive: false,
 		});
+
+
+
 	})();
 </script>

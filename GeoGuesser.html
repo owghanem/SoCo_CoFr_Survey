@@ -58,21 +58,21 @@
 	<div class="map-section">
 		<div id="map" style="height: 400px; width: 100%; background: #aad3df"></div>
 		<p>Selected Country: <strong id="selection-display">None</strong></p>
-		<button
-			type="button"
-			id="submit-btn"
-			style="padding: 10px 20px; cursor: pointer"
-		>
-			Submit Guess
-		</button>
 	</div>
 </div>
 
 <script>
+	window.addEventListener("load", function() {
+		let nextButton = document.getElementById("submit0");
+		if (nextButton) {
+			nextButton.disabled = true; 
+		}
+	});
+
+
 	// 1. SET THE TARGET
 	const targetCountry = "%answer%";
-    const roundNumber = "%roundNum%";
-    const variableID = "G101_0" + roundNumber;
+    const variableID = "%var%";
 
 	let selectedCountry = "";
 	let geoLayer;
@@ -94,8 +94,6 @@
 						// Reset style
 						geoLayer.resetStyle();
 
-						console.log("Country Data:", feature.properties);
-
 						// Set selection
 						selectedCountry =
 							feature.properties.ADMIN ||
@@ -107,37 +105,27 @@
 						// Highlight selected country
 
 						layer.setStyle({ fillOpacity: 0.7, fillColor: "#ffcc00" });
+
+						// Determine if correct
+						const isCorrect = 
+							selectedCountry.trim().toLowerCase() === targetCountry.trim().toLowerCase() 
+							? 1 : 0;
+
+						console.log("Selected:", selectedCountry, "Target:", targetCountry, "Correct?", isCorrect);
+
+						// SAVE TO SOSCI
+						const varElement = document.getElementById(variableID);
+						if (varElement) {
+							varElement.value = isCorrect;
+						}
+
+						// Enable Next button
+						const nextButton = document.getElementById("submit0");
+						if (nextButton) {
+							nextButton.disabled = false;
+						}
 					});
 				},
 			}).addTo(map);
 		});
-
-	// 4. SUBMIT LOGIC
-	document.getElementById("submit-btn").addEventListener("click", function () {
-		if (!selectedCountry) {
-			alert("Please select a country first!");
-			return;
-		}
-
-		// Determine if correct
-		const isCorrect = selectedCountry === targetCountry ? 1 : 0;
-
-		// SAVE TO SOSCI (Assuming GG01_01 is your internal variable)
-		document.getElementById(variableID).value = isCorrect;
-
-		// Optional Feedback
-		if (isCorrect) {
-			alert("Correct! It was " + targetCountry);
-		} else {
-			alert(
-				"Wrong. You picked " +
-					selectedCountry +
-					", but it was " +
-					targetCountry,
-			);
-		}
-
-		// Move to next page
-		// SoSciTools.submitPage();
-	});
 </script>
