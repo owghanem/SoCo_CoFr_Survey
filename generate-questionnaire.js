@@ -81,7 +81,7 @@ const freqPages = [
   {
     ident: "freq1",
     pageIntID: 22,
-    setup: { type: "measure", intID: 25, varName: "G103_01" },
+    setup: { type: "measure", intID: 25, varName: "G103_01", maxMm: 500, goalMm: 145 },
     question: { id: "G103", intID: 24 },
     mainText: { id: "MT01", intID: 23 },
     fbTextIntID: null,
@@ -90,7 +90,7 @@ const freqPages = [
   {
     ident: "freq2",
     pageIntID: 70,
-    setup: { type: "measure", intID: 71, varName: "G103_02" },
+    setup: { type: "measure", intID: 71, varName: "G103_02", maxMm: 500, goalMm: 278 },
     question: { id: "G103", intID: 72 },
     mainText: { id: "MT01", intID: 73 },
     fbTextIntID: 61,
@@ -242,7 +242,7 @@ const nonfPages = [
   {
     ident: "nonf1",
     pageIntID: 74,
-    setup: { type: "measure", intID: 75, varName: "G103_03" },
+    setup: { type: "measure", intID: 75, varName: "G103_03", maxMm: 500, goalMm: 322 },
     question: { id: "G103", intID: 76 },
     mainText: { id: "MT01", intID: 77 },
     fbTextIntID: 114,
@@ -251,7 +251,7 @@ const nonfPages = [
   {
     ident: "nonf2",
     pageIntID: 78,
-    setup: { type: "measure", intID: 79, varName: "G103_04" },
+    setup: { type: "measure", intID: 79, varName: "G103_04", maxMm: 500, goalMm: 467 },
     question: { id: "G103", intID: 80 },
     mainText: { id: "MT01", intID: 81 },
     fbTextIntID: 115,
@@ -439,6 +439,8 @@ function buildTextBlock(id, intID) {
  *   type: "measure" | "geo" | "shape",
  *   intID: number,
  *   varName?: string,
+ *   maxMm?: number,
+ *   goalMm?: number,
  *   answer?: string,
  *   lat?: string,
  *   lng?: string,
@@ -452,7 +454,7 @@ function buildSetupPhp(setup) {
   if (setup.type === "measure") {
     return buildPhpBlock(
       setup.intID,
-      `$var = '${setup.varName}';\n$maxCm = 50;\n$goal = 15;\n\nreplace('%var%', $var);\nreplace('%maxCm%', $maxCm);\nreplace('%goal%', $goal);`
+      `$var = '${setup.varName}';\n$maxMm = ${setup.maxMm ?? 500};\n$goalMm = ${setup.goalMm ?? 150};\n\nreplace('%var%', $var);\nreplace('%maxMm%', $maxMm);\nreplace('%goalMm%', $goalMm);`
     );
   }
 
@@ -495,10 +497,11 @@ document.addEventListener("DOMContentLoaded", function () {
     overlay.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;";
     
     var box = document.createElement("div");
-    box.style.cssText = "background:white;padding:40px;border-radius:10px;text-align:center;max-width:320px;box-shadow:0 4px 20px rgba(0,0,0,0.3);font-family:sans-serif;";
+    box.style.cssText = "background:linear-gradient(180deg,#ffffff 0%,#f7fbff 100%);padding:40px;border-radius:14px;text-align:center;max-width:360px;box-shadow:0 12px 40px rgba(0,0,0,0.28);font-family:sans-serif;transform:scale(.96);opacity:0;animation:popup-pop-in .22s ease-out forwards;";
     
     box.style.position = "relative";
     box.innerHTML =
+      "<style>@keyframes popup-pop-in{to{transform:scale(1);opacity:1;}}</style>" +
       "<div style=\\"position:absolute;top:12px;right:12px;width:34px;height:34px;\\">" +
         "<svg width=\\"34\\" height=\\"34\\" viewBox=\\"0 0 34 34\\">" +
           "<circle cx=\\"17\\" cy=\\"17\\" r=\\"14\\" stroke=\\"#E0E0E0\\" stroke-width=\\"4\\" fill=\\"none\\"></circle>" +
@@ -506,8 +509,10 @@ document.addEventListener("DOMContentLoaded", function () {
           "<text id=\\"popup-timer-label\\" x=\\"17\\" y=\\"21\\" text-anchor=\\"middle\\" font-size=\\"9\\" fill=\\"#333\\" font-family=\\"sans-serif\\">10</text>" +
         "</svg>" +
       "</div>" +
-      "<p style=\\"font-size:18px;color:#333;\\">You earned <strong>' . $points . ' points</strong> ${bodySuffix}</p>" +
-      "<button id=\\"popup-continue\\" style=\\"margin-top:15px;padding:10px 30px;background:#0055A4;color:white;border:none;border-radius:5px;cursor:pointer;font-size:16px;\\">Continue</button>";
+      "<div style=\\"font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#4b5563;font-weight:700;\\">Round Result</div>" +
+      "<div style=\\"margin:10px auto 14px auto;display:inline-block;padding:8px 16px;border-radius:999px;background:#0055A4;color:#ffffff;font-size:30px;font-weight:800;line-height:1;\\">' . $points . ' pts</div>" +
+      "<p style=\\"margin:0;font-size:20px;color:#0f172a;\\">You earned ' . $points . ' points <strong>${bodySuffix}</strong></p>" +
+      "<button id=\\"popup-continue\\" style=\\"margin-top:18px;padding:11px 30px;background:#0055A4;color:white;border:none;border-radius:8px;cursor:pointer;font-size:16px;font-weight:700;\\">Continue</button>";
 
     overlay.appendChild(box);
     document.body.appendChild(overlay);
