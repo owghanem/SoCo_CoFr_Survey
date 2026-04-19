@@ -168,9 +168,13 @@
 
 <script>
 	(function () {
+		function getNextButton() {
+			return document.getElementById("submit0") || document.getElementById("submitO") || document.querySelector("button[type='submit'], input[type='submit']");
+		}
+
 		// Wait for the page to load, then disable the Next button
 		window.addEventListener("load", function () {
-			let nextButton = document.getElementById("submit0");
+			let nextButton = getNextButton();
 			if (nextButton) {
 				nextButton.disabled = true;
 			}
@@ -295,7 +299,8 @@
 				// LOGGING FOR VERIFICATION
 				console.log(`Current raw pixels: ${newPixels.toFixed(2)}, Calculated mm: ${mm}mm`);
 
-				document.getElementById("submit0").disabled = false;
+				const nextButton = getNextButton();
+				if (nextButton) nextButton.disabled = false;
 			}
 		}
 

@@ -59,6 +59,10 @@
 </div>
 
 <script>
+    function getNextButton() {
+        return document.getElementById("submit0") || document.getElementById("submitO") || document.querySelector("button[type='submit'], input[type='submit']");
+    }
+
     // ── Street View ────────────────────────────────────────────────
     function initStreetView() {
         // Option A: use lat/lng from SoSci variables
@@ -134,7 +138,7 @@
 
     // ── SoSci / Game Logic ─────────────────────────────────────────
     window.addEventListener("load", function () {
-        const nextButton = document.getElementById("submit0");
+        const nextButton = getNextButton();
         if (nextButton) nextButton.disabled = true;
     });
 
@@ -186,7 +190,7 @@
                         const varElement = document.getElementById(variableID);
                         if (varElement) varElement.value = isCorrect;
 
-                        const nextButton = document.getElementById("submit0");
+                        const nextButton = getNextButton();
                         if (nextButton) nextButton.disabled = false;
                     });
                 },

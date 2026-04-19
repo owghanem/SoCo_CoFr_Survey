@@ -3,14 +3,40 @@
 const fs = require("fs");
 const path = require("path");
 
-const OUTPUT_PATH = path.join(__dirname, "Questionare.generated.xml");
-const OVERWRITE_OUTPUT_PATH = path.join(__dirname, "Questionare.xml");
-const API_KEY = "AIzaSyBH4b_fqRO3u5GO_AtdXM2SNt_SW1TKdjw";
+const PATHS = {
+	default: path.join(__dirname, "Questionare.generated.xml"),
+	overwrite: path.join(__dirname, "Questionare.xml"),
+};
 
-const introHtml = `<div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto;">
-  
+function readEnvValue(key) {
+	const envPath = path.join(__dirname, ".env");
+	if (!fs.existsSync(envPath)) return undefined;
+
+	const envText = fs.readFileSync(envPath, "utf8");
+	const line = envText
+		.split(/\r?\n/)
+		.find((raw) => raw.trim().startsWith(`${key}=`));
+
+	if (!line) return undefined;
+	const rawValue = line.slice(line.indexOf("=") + 1).trim();
+
+	if (
+		(rawValue.startsWith('"') && rawValue.endsWith('"')) ||
+		(rawValue.startsWith("'") && rawValue.endsWith("'"))
+	) {
+		return rawValue.slice(1, -1);
+	}
+
+	return rawValue;
+}
+
+const GOOGLE_API_KEY =
+	readEnvValue("API_KEY") || readEnvValue("GOOGLE_API_KEY") || "";
+
+const INTRO_HTML = `<div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto;">
+
   <h1 style="text-align: center; margin-bottom: 20px;">Welcome to the Study!</h1>
-  
+
   <p>Thank you for your interest in participating in our research. Before you decide to begin, please read the following information carefully.</p>
 
   <h3 style="border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 30px;">What is this study about?</h3>
@@ -31,7 +57,7 @@ const introHtml = `<div style="font-family: Arial, sans-serif; line-height: 1.6;
     <li>You have a <strong>confident command of the English language</strong>.</li>
   </ul>
 
-  <h3 style="border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 30px;">Voluntary Participation & Data Privacy</h3>
+  <h3 style="border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 30px;">Voluntary Participation &amp; Data Privacy</h3>
   <p>Your participation is entirely voluntary. You are free to stop and withdraw from the study at any time simply by closing your browser, without giving a reason and without any negative consequences. All data collected during this study is strictly anonymous and will be used solely for academic research purposes.</p>
 
   <div style="background-color: #f9f9f9; padding: 15px; border-left: 4px solid #4CAF50; margin-top: 30px;">
@@ -40,500 +66,690 @@ const introHtml = `<div style="font-family: Arial, sans-serif; line-height: 1.6;
 
 </div>`;
 
-const randPhp = `// Retrieve the randomly drawn condition
+const RANDOMISATION_PHP = `
 $condition = value('V102');
 
-// If 1: Frequent condition comes first
-if ($condition == 1) {
-  setPageOrder('freq1-freq16', 'mid1', 'nonf1-nonf16', 'mid2', 'end');
-} 
-// If 2: Non-Frequent condition comes first
-else {
-  setPageOrder('nonf1-nonf16', 'mid1', 'freq1-freq16', 'mid2', 'end');
-}
+if (!isset($freq_pages) || !isset($nonf_pages) || !isset($points_freq) || !isset($points_nonfreq)) {
+  $geo_pages = array('G1', 'G2', 'G3', 'G4');
+  $tape_pages = array('T1', 'T2', 'T3', 'T4');
+  $split_pages = array('S1', 'S2', 'S3', 'S4');
+  $question_pages = array(
+    'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q10',
+    'Q11', 'Q12', 'Q13', 'Q14', 'Q15', 'Q16', 'Q17', 'Q18', 'Q19', 'Q20'
+  );
 
-if (!isset($points_freq)) {
-  
-  // Exactly 16 numbers (5-10) that sum to 120
-  $points_freq = array(7, 8, 8, 7, 10, 5, 9, 6, 8, 7, 9, 6, 10, 5, 8, 7); 
-  
-  // Exactly 4 numbers (20-40) that sum to 120
-  $points_nonfreq = array(30, 25, 35, 30); 
-  
-  // Shuffle the order so it feels random and unpredictable to the participant
+  shuffle($geo_pages);
+  shuffle($tape_pages);
+  shuffle($split_pages);
+  shuffle($question_pages);
+
+  $freq_pages = array_merge(
+    array_slice($geo_pages, 0, 2),
+    array_slice($tape_pages, 0, 2),
+    array_slice($split_pages, 0, 2),
+    array_slice($question_pages, 0, 10)
+  );
+
+  $nonf_pages = array_merge(
+    array_slice($geo_pages, 2, 2),
+    array_slice($tape_pages, 2, 2),
+    array_slice($split_pages, 2, 2),
+    array_slice($question_pages, 10, 10)
+  );
+
+  shuffle($freq_pages);
+  shuffle($nonf_pages);
+
+  $points_freq = array(7, 8, 8, 7, 10, 5, 9, 6, 8, 7, 9, 6, 10, 5, 8, 7);
+  $points_nonfreq = array(30, 25, 35, 30);
+
   shuffle($points_freq);
   shuffle($points_nonfreq);
-  
-  // Save for this session
+
+  registerVariable($freq_pages);
+  registerVariable($nonf_pages);
   registerVariable($points_freq);
   registerVariable($points_nonfreq);
-  
-  // Store permanently in dataset using the Internal Variables (IV01 and IV02)
+
   for ($i = 0; $i < 16; $i++) {
     put(id('V103', $i + 1), $points_freq[$i]);
   }
   for ($i = 0; $i < 4; $i++) {
     put(id('V104', $i + 1), $points_nonfreq[$i]);
   }
-}`;
+}
 
-const freqPages = [
+if ($condition == 1) {
+  setPageOrder(
+    $freq_pages[0], $freq_pages[1], $freq_pages[2], $freq_pages[3],
+    $freq_pages[4], $freq_pages[5], $freq_pages[6], $freq_pages[7],
+    $freq_pages[8], $freq_pages[9], $freq_pages[10], $freq_pages[11],
+    $freq_pages[12], $freq_pages[13], $freq_pages[14], $freq_pages[15],
+    'fperf',
+    'q112',
+    $nonf_pages[0], $nonf_pages[1], $nonf_pages[2], $nonf_pages[3],
+    $nonf_pages[4], $nonf_pages[5], $nonf_pages[6], $nonf_pages[7],
+    $nonf_pages[8], $nonf_pages[9], $nonf_pages[10], $nonf_pages[11],
+    $nonf_pages[12], $nonf_pages[13], $nonf_pages[14], $nonf_pages[15],
+    'nperf',
+    'end'
+  );
+} else {
+  setPageOrder(
+    $nonf_pages[0], $nonf_pages[1], $nonf_pages[2], $nonf_pages[3],
+    $nonf_pages[4], $nonf_pages[5], $nonf_pages[6], $nonf_pages[7],
+    $nonf_pages[8], $nonf_pages[9], $nonf_pages[10], $nonf_pages[11],
+    $nonf_pages[12], $nonf_pages[13], $nonf_pages[14], $nonf_pages[15],
+    'nperf',
+    'q112',
+    $freq_pages[0], $freq_pages[1], $freq_pages[2], $freq_pages[3],
+    $freq_pages[4], $freq_pages[5], $freq_pages[6], $freq_pages[7],
+    $freq_pages[8], $freq_pages[9], $freq_pages[10], $freq_pages[11],
+    $freq_pages[12], $freq_pages[13], $freq_pages[14], $freq_pages[15],
+    'fperf',
+    'end'
+  );
+}
+`.trim();
+
+const TRIAL_PAGES = [
 	{
-		ident: "freq1",
+		ident: "T1",
+		kind: "tape",
 		pageIntID: 22,
+		question: { id: "G103", intID: 24 },
+		mainText: { id: "MT01", intID: 23 },
+		fbTextIntID: 19,
+		popupIntID: 130,
 		setup: {
 			type: "measure",
 			intID: 25,
-			answerVar: "G103_01",
-      goalVar: "G103_02",
+			varName: "G103_01",
 			maxMm: 500,
+			goalMm: 145,
 		},
-		question: { id: "G103", intID: 24 },
-		mainText: { id: "MT01", intID: 23 },
-		fbTextIntID: null,
-		popupPhpIntID: 130,
 	},
 	{
-		ident: "freq2",
+		ident: "T2",
+		kind: "tape",
 		pageIntID: 70,
+		question: { id: "G103", intID: 72 },
+		mainText: { id: "MT01", intID: 73 },
+		fbTextIntID: 20,
+		popupIntID: 131,
 		setup: {
 			type: "measure",
 			intID: 71,
-			answerVar: "G103_03",
-      goalVar: "G103_04",
+			varName: "G103_02",
 			maxMm: 500,
+			goalMm: 278,
 		},
-		question: { id: "G103", intID: 72 },
-		mainText: { id: "MT01", intID: 73 },
-		fbTextIntID: 61,
-		popupPhpIntID: 131,
 	},
 	{
-		ident: "freq3",
-		pageIntID: 5,
-		setup: {
-			type: "geo",
-			intID: 26,
-			answer: "United States of America",
-			varName: "G101_01",
-			lat: "32.0117548",
-			lng: "-93.9271803",
-		},
-		question: { id: "G101", intID: 11 },
-		mainText: { id: "GG01", intID: 18 },
-		fbTextIntID: 62,
-		popupPhpIntID: 132,
-	},
-	{
-		ident: "freq4",
-		pageIntID: 82,
-		setup: {
-			type: "geo",
-			intID: 83,
-			answer: "Greece",
-			varName: "G101_02",
-			lat: "37.6047259",
-			lng: "23.3298282",
-		},
-		question: { id: "G101", intID: 84 },
-		mainText: { id: "GG01", intID: 85 },
-		fbTextIntID: 63,
-		popupPhpIntID: 133,
-	},
-	{
-		ident: "freq5",
-		pageIntID: 27,
-		setup: { type: "shape", intID: 30, img: "prezel.png", varName: "G102_01" },
-		question: { id: "G102", intID: 28 },
-		mainText: { id: "SH01", intID: 29 },
-		fbTextIntID: 66,
-		popupPhpIntID: 134,
-	},
-	{
-		ident: "freq6",
-		pageIntID: 94,
-		setup: {
-			type: "shape",
-			intID: 95,
-			img: "banana_1.png",
-			varName: "G102_02",
-		},
-		question: { id: "G102", intID: 96 },
-		mainText: { id: "SH01", intID: 97 },
-		fbTextIntID: 68,
-		popupPhpIntID: 135,
-	},
-	{
-		ident: "freq7",
-		pageIntID: 16,
-		setup: null,
-		question: { id: "A101", intID: 17 },
-		mainText: null,
-		fbTextIntID: 106,
-		popupPhpIntID: 136,
-	},
-	{
-		ident: "freq8",
-		pageIntID: 6,
-		setup: null,
-		question: { id: "A107", intID: 12 },
-		mainText: null,
-		fbTextIntID: 107,
-		popupPhpIntID: 137,
-	},
-	{
-		ident: "freq9",
-		pageIntID: 32,
-		setup: null,
-		question: { id: "A103", intID: 43 },
-		mainText: null,
-		fbTextIntID: 108,
-		popupPhpIntID: 138,
-	},
-	{
-		ident: "freq10",
-		pageIntID: 8,
-		setup: null,
-		question: { id: "A109", intID: 14 },
-		mainText: null,
-		fbTextIntID: 109,
-		popupPhpIntID: 139,
-	},
-	{
-		ident: "freq11",
-		pageIntID: 9,
-		setup: null,
-		question: { id: "A105", intID: 15 },
-		mainText: null,
-		fbTextIntID: 20,
-		popupPhpIntID: 140,
-	},
-	{
-		ident: "freq12",
-		pageIntID: 38,
-		setup: null,
-		question: { id: "A201", intID: 49 },
-		mainText: null,
-		fbTextIntID: 21,
-		popupPhpIntID: 141,
-	},
-	{
-		ident: "freq13",
-		pageIntID: 39,
-		setup: null,
-		question: { id: "A207", intID: 50 },
-		mainText: null,
-		fbTextIntID: 110,
-		popupPhpIntID: 142,
-	},
-	{
-		ident: "freq14",
-		pageIntID: 40,
-		setup: null,
-		question: { id: "A203", intID: 51 },
-		mainText: null,
-		fbTextIntID: 111,
-		popupPhpIntID: 143,
-	},
-	{
-		ident: "freq15",
-		pageIntID: 41,
-		setup: null,
-		question: { id: "A209", intID: 52 },
-		mainText: null,
-		fbTextIntID: 112,
-		popupPhpIntID: 144,
-	},
-	{
-		ident: "freq16",
-		pageIntID: 53,
-		setup: null,
-		question: { id: "A205", intID: 64 },
-		mainText: null,
-		fbTextIntID: 113,
-		popupPhpIntID: 145,
-	},
-];
-
-const nonfPages = [
-	{
-		ident: "nonf1",
+		ident: "T3",
+		kind: "tape",
 		pageIntID: 74,
-		setup: {
-			type: "measure",
-			intID: 75,
-			answerVar: "G103_05",
-      goalVar: "G103_06",
-			maxMm: 500,
-		},
 		question: { id: "G103", intID: 76 },
 		mainText: { id: "MT01", intID: 77 },
 		fbTextIntID: 114,
-		popupPhpIntID: 146,
-	},
-	{
-		ident: "nonf2",
-		pageIntID: 78,
+		popupIntID: 146,
 		setup: {
 			type: "measure",
-			intID: 79,
-      answerVar: "G103_07",
-			goalVar: "G103_08",
+			intID: 75,
+			varName: "G103_03",
 			maxMm: 500,
+			goalMm: 322,
 		},
+	},
+	{
+		ident: "T4",
+		kind: "tape",
+		pageIntID: 78,
 		question: { id: "G103", intID: 80 },
 		mainText: { id: "MT01", intID: 81 },
 		fbTextIntID: 115,
-		popupPhpIntID: 147,
+		popupIntID: 147,
+		setup: {
+			type: "measure",
+			intID: 79,
+			varName: "G103_04",
+			maxMm: 500,
+			goalMm: 467,
+		},
 	},
 	{
-		ident: "nonf3",
-		pageIntID: 86,
+		ident: "G1",
+		kind: "geo",
+		pageIntID: 5,
+		question: { id: "G101", intID: 11 },
+		mainText: { id: "GG01", intID: 18 },
+		fbTextIntID: 21,
+		popupIntID: 132,
 		setup: {
 			type: "geo",
-			intID: 87,
-			answer: "Canada",
-			varName: "G101_03",
-			lat: "53.1995399",
-			lng: "-105.3321598",
+			intID: 26,
+			varName: "G101_01",
+			answer: "United States of America",
+			lat: "32.0117548",
+			lng: "-93.9271803",
 		},
+	},
+	{
+		ident: "G2",
+		kind: "geo",
+		pageIntID: 82,
+		question: { id: "G101", intID: 84 },
+		mainText: { id: "GG01", intID: 85 },
+		fbTextIntID: 63,
+		popupIntID: 133,
+		setup: {
+			type: "geo",
+			intID: 83,
+			varName: "G101_02",
+			answer: "Greece",
+			lat: "37.6047259",
+			lng: "23.3298282",
+		},
+	},
+	{
+		ident: "G3",
+		kind: "geo",
+		pageIntID: 86,
 		question: { id: "G101", intID: 88 },
 		mainText: { id: "GG01", intID: 89 },
 		fbTextIntID: 116,
-		popupPhpIntID: 148,
-	},
-	{
-		ident: "nonf4",
-		pageIntID: 90,
+		popupIntID: 148,
 		setup: {
 			type: "geo",
-			intID: 91,
-			answer: "Uruguay",
-			varName: "G101_04",
-			lat: "-30.4625891",
-			lng: "-56.9016809",
+			intID: 87,
+			varName: "G101_03",
+			answer: "Canada",
+			lat: "53.1995399",
+			lng: "-105.3321598",
 		},
+	},
+	{
+		ident: "G4",
+		kind: "geo",
+		pageIntID: 90,
 		question: { id: "G101", intID: 92 },
 		mainText: { id: "GG01", intID: 93 },
 		fbTextIntID: 117,
-		popupPhpIntID: 149,
+		popupIntID: 149,
+		setup: {
+			type: "geo",
+			intID: 91,
+			varName: "G101_04",
+			answer: "Uruguay",
+			lat: "-30.4625891",
+			lng: "-56.9016809",
+		},
 	},
 	{
-		ident: "nonf5",
-		pageIntID: 98,
+		ident: "S1",
+		kind: "split",
+		pageIntID: 27,
+		question: { id: "G102", intID: 28 },
+		mainText: { id: "SH01", intID: 29 },
+		fbTextIntID: 61,
+		popupIntID: 134,
+		setup: { type: "shape", intID: 30, varName: "G102_01", img: "prezel.png" },
+	},
+	{
+		ident: "S2",
+		kind: "split",
+		pageIntID: 94,
+		question: { id: "G102", intID: 96 },
+		mainText: { id: "SH01", intID: 97 },
+		fbTextIntID: 62,
+		popupIntID: 135,
 		setup: {
 			type: "shape",
-			intID: 99,
-			img: "croissant.png",
-			varName: "G102_03",
+			intID: 95,
+			varName: "G102_02",
+			img: "banana_1.png",
 		},
+	},
+	{
+		ident: "S3",
+		kind: "split",
+		pageIntID: 98,
 		question: { id: "G102", intID: 100 },
 		mainText: { id: "SH01", intID: 101 },
 		fbTextIntID: 118,
-		popupPhpIntID: 150,
+		popupIntID: 150,
+		setup: {
+			type: "shape",
+			intID: 99,
+			varName: "G102_03",
+			img: "croissant.png",
+		},
 	},
 	{
-		ident: "nonf6",
+		ident: "S4",
+		kind: "split",
 		pageIntID: 102,
-		setup: { type: "shape", intID: 103, img: "apple.png", varName: "G102_04" },
 		question: { id: "G102", intID: 104 },
 		mainText: { id: "SH01", intID: 105 },
 		fbTextIntID: 119,
-		popupPhpIntID: 151,
+		popupIntID: 151,
+		setup: { type: "shape", intID: 103, varName: "G102_04", img: "apple.png" },
 	},
 	{
-		ident: "nonf7",
-		pageIntID: 33,
+		ident: "Q1",
+		kind: "standard",
+		pageIntID: 16,
+		question: { id: "Q101", intID: 17 },
+		mainText: null,
+		fbTextIntID: 63,
+		popupIntID: 136,
 		setup: null,
-		question: { id: "A106", intID: 44 },
+	},
+	{
+		ident: "Q2",
+		kind: "standard",
+		pageIntID: 6,
+		question: { id: "Q107", intID: 12 },
+		mainText: null,
+		fbTextIntID: 66,
+		popupIntID: 137,
+		setup: null,
+	},
+	{
+		ident: "Q3",
+		kind: "standard",
+		pageIntID: 32,
+		question: { id: "Q103", intID: 43 },
+		mainText: null,
+		fbTextIntID: 68,
+		popupIntID: 138,
+		setup: null,
+	},
+	{
+		ident: "Q4",
+		kind: "standard",
+		pageIntID: 8,
+		question: { id: "Q109", intID: 14 },
+		mainText: null,
+		fbTextIntID: 82,
+		popupIntID: 139,
+		setup: null,
+	},
+	{
+		ident: "Q5",
+		kind: "standard",
+		pageIntID: 9,
+		question: { id: "Q105", intID: 15 },
+		mainText: null,
+		fbTextIntID: 83,
+		popupIntID: 140,
+		setup: null,
+	},
+	{
+		ident: "Q6",
+		kind: "standard",
+		pageIntID: 38,
+		question: { id: "Q201", intID: 49 },
+		mainText: null,
+		fbTextIntID: 84,
+		popupIntID: 141,
+		setup: null,
+	},
+	{
+		ident: "Q7",
+		kind: "standard",
+		pageIntID: 39,
+		question: { id: "Q207", intID: 50 },
+		mainText: null,
+		fbTextIntID: 85,
+		popupIntID: 142,
+		setup: null,
+	},
+	{
+		ident: "Q8",
+		kind: "standard",
+		pageIntID: 40,
+		question: { id: "Q203", intID: 51 },
+		mainText: null,
+		fbTextIntID: 106,
+		popupIntID: 143,
+		setup: null,
+	},
+	{
+		ident: "Q9",
+		kind: "standard",
+		pageIntID: 41,
+		question: { id: "Q209", intID: 52 },
+		mainText: null,
+		fbTextIntID: 107,
+		popupIntID: 144,
+		setup: null,
+	},
+	{
+		ident: "Q10",
+		kind: "standard",
+		pageIntID: 53,
+		question: { id: "Q205", intID: 64 },
+		mainText: null,
+		fbTextIntID: 108,
+		popupIntID: 145,
+		setup: null,
+	},
+	{
+		ident: "Q11",
+		kind: "standard",
+		pageIntID: 33,
+		question: { id: "Q106", intID: 44 },
 		mainText: null,
 		fbTextIntID: 120,
-		popupPhpIntID: 152,
+		popupIntID: 152,
+		setup: null,
 	},
 	{
-		ident: "nonf8",
+		ident: "Q12",
+		kind: "standard",
 		pageIntID: 34,
-		setup: null,
-		question: { id: "A102", intID: 45 },
+		question: { id: "Q102", intID: 45 },
 		mainText: null,
 		fbTextIntID: 121,
-		popupPhpIntID: 153,
+		popupIntID: 153,
+		setup: null,
 	},
 	{
-		ident: "nonf9",
+		ident: "Q13",
+		kind: "standard",
 		pageIntID: 35,
-		setup: null,
-		question: { id: "A108", intID: 46 },
+		question: { id: "Q108", intID: 46 },
 		mainText: null,
 		fbTextIntID: 122,
-		popupPhpIntID: 154,
+		popupIntID: 154,
+		setup: null,
 	},
 	{
-		ident: "nonf10",
+		ident: "Q14",
+		kind: "standard",
 		pageIntID: 36,
-		setup: null,
-		question: { id: "A104", intID: 47 },
+		question: { id: "Q104", intID: 47 },
 		mainText: null,
 		fbTextIntID: 123,
-		popupPhpIntID: 155,
+		popupIntID: 155,
+		setup: null,
 	},
 	{
-		ident: "nonf11",
+		ident: "Q15",
+		kind: "standard",
 		pageIntID: 37,
-		setup: null,
-		question: { id: "A110", intID: 48 },
+		question: { id: "Q110", intID: 48 },
 		mainText: null,
 		fbTextIntID: 124,
-		popupPhpIntID: 156,
+		popupIntID: 156,
+		setup: null,
 	},
 	{
-		ident: "nonf12",
+		ident: "Q16",
+		kind: "standard",
 		pageIntID: 54,
-		setup: null,
-		question: { id: "A206", intID: 65 },
+		question: { id: "Q206", intID: 65 },
 		mainText: null,
 		fbTextIntID: 125,
-		popupPhpIntID: 157,
+		popupIntID: 157,
+		setup: null,
 	},
 	{
-		ident: "nonf13",
+		ident: "Q17",
+		kind: "standard",
 		pageIntID: 55,
-		setup: null,
-		question: { id: "A202", intID: 59 },
+		question: { id: "Q202", intID: 59 },
 		mainText: null,
 		fbTextIntID: 126,
-		popupPhpIntID: 158,
+		popupIntID: 158,
+		setup: null,
 	},
 	{
-		ident: "nonf14",
+		ident: "Q18",
+		kind: "standard",
 		pageIntID: 56,
-		setup: null,
-		question: { id: "A208", intID: 67 },
+		question: { id: "Q208", intID: 67 },
 		mainText: null,
 		fbTextIntID: 127,
-		popupPhpIntID: 159,
+		popupIntID: 159,
+		setup: null,
 	},
 	{
-		ident: "nonf15",
+		ident: "Q19",
+		kind: "standard",
 		pageIntID: 57,
-		setup: null,
-		question: { id: "A204", intID: 60 },
+		question: { id: "Q204", intID: 60 },
 		mainText: null,
 		fbTextIntID: 128,
-		popupPhpIntID: 160,
+		popupIntID: 160,
+		setup: null,
 	},
 	{
-		ident: "nonf16",
+		ident: "Q20",
+		kind: "standard",
 		pageIntID: 58,
-		setup: null,
-		question: { id: "A210", intID: 69 },
+		question: { id: "Q210", intID: 69 },
 		mainText: null,
 		fbTextIntID: 129,
-		popupPhpIntID: 161,
+		popupIntID: 161,
+		setup: null,
 	},
 ];
 
-/**
- * Indents each non-empty line in a string by a number of two-space levels.
- * @param {string} text Source text to indent.
- * @param {number} [level=0] Number of indent levels.
- * @returns {string} Indented text.
- */
-function indent(text, level = 0) {
-	const prefix = "  ".repeat(level);
-	return text
-		.split("\n")
-		.map((line) => (line.length ? `${prefix}${line}` : line))
-		.join("\n");
+const cdata = (content) => `<![CDATA[\n${content}\n]]>`;
+const phpTag = (intID, code) => `<php intID="${intID}">${cdata(code)}</php>`;
+const textTag = (id, intID) =>
+	`<text id="${id}" intID="${intID}">\n\t<spacing>default</spacing>\n</text>`;
+
+function setupPhp({
+	type,
+	intID,
+	varName,
+	maxMm,
+	goalMm,
+	answer,
+	lat,
+	lng,
+	img,
+}) {
+	const replacements = {
+		measure: `
+$var    = '${varName}';
+$maxMm  = ${maxMm ?? 500};
+$goalMm = ${goalMm ?? 150};
+replace('%var%',    $var);
+replace('%maxMm%',  $maxMm);
+replace('%goalMm%', $goalMm);`,
+
+		geo: `
+$answer  = '${answer}';
+$var     = '${varName}';
+$lat     = '${lat}';
+$lng     = '${lng}';
+$api_key = '${GOOGLE_API_KEY}';
+replace('%api_key%', $api_key);
+replace('%lat%',     $lat);
+replace('%lng%',     $lng);
+replace('%answer%',  $answer);
+replace('%var%',     $var);`,
+
+		shape: `
+$img = '${img}';
+$var = '${varName}';
+replace('%img%', $img);
+replace('%var%', $var);`,
+	};
+
+	if (!replacements[type]) throw new Error(`Unknown setup type: "${type}"`);
+	return phpTag(intID, replacements[type].trim());
 }
 
-/**
- * Wraps PHP code in a SoSci XML php node with CDATA.
- * @param {number} intID Internal SoSci node id.
- * @param {string} code PHP source code.
- * @returns {string} XML php block.
- */
-function buildPhpBlock(intID, code) {
-	return `<php intID="${intID}"><![CDATA[\n${code}\n]]></php>`;
-}
-
-/**
- * Builds a SoSci text node with default spacing.
- * @param {string} id SoSci text id.
- * @param {number} intID Internal SoSci node id.
- * @returns {string} XML text block.
- */
-function buildTextBlock(id, intID) {
-	return `<text id="${id}" intID="${intID}">\n\t<spacing>default</spacing>\n</text>`;
-}
-
-/**
- * Builds the setup PHP for task-specific placeholder replacement.
- * @param {null | {
- *   type: "measure" | "geo" | "shape",
- *   intID: number,
- *   varName?: string,
- *   maxMm?: number,
- *   goalMm?: number,
- *   answer?: string,
- *   lat?: string,
- *   lng?: string,
- *   img?: string
- * }} setup Setup descriptor for a trial page.
- * @returns {string} XML php block or empty string when no setup is required.
- */
-function buildSetupPhp(setup) {
-	if (!setup) return "";
-
-	if (setup.type === "measure") {
-		return buildPhpBlock(
-			setup.intID,
-			`$var = '${setup.varName}';\n$maxMm = ${setup.maxMm ?? 500};\n$goalMm = ${setup.goalMm ?? 150};\n\nreplace('%var%', $var);\nreplace('%maxMm%', $maxMm);\nreplace('%goalMm%', $goalMm);`,
-		);
-	}
-
-	if (setup.type === "geo") {
-		return buildPhpBlock(
-			setup.intID,
-			`$answer = '${setup.answer}';\n$var = '${setup.varName}';\n$lat = '${setup.lat}';\n$lng = '${setup.lng}';\n$api_key = '${API_KEY}';\n\nreplace('%api_key%', $api_key);\nreplace('%lat%', $lat);\nreplace('%lng%', $lng);\nreplace('%answer%', $answer);\nreplace('%var%', $var);`,
-		);
-	}
-
-	if (setup.type === "shape") {
-		return buildPhpBlock(
-			setup.intID,
-			`$img = '${setup.img}';\n$var = '${setup.varName}';\n\nreplace('%img%', $img);\nreplace('%var%', $var);`,
-		);
-	}
-
-	throw new Error(`Unsupported setup type: ${setup.type}`);
-}
-
-/**
- * Builds the shared popup JavaScript used in frequent and non-frequent feedback.
- * @param {string} bodySuffix Suffix after the points value in the body sentence.
- * @returns {string} Script tag content as a string.
- */
-function buildPopupJs(bodySuffix) {
+function popupScriptTag(bodySuffix, requireAnswer, showPopup) {
 	return `<script>
 document.addEventListener("DOMContentLoaded", function () {
-  var btn = document.getElementById("submitO"); 
+  var btn = document.getElementById("submitO");
   if (!btn) btn = document.querySelector("button[type=\\"submit\\"]");
   if (!btn) return;
 
+  var requireAnswer = ${requireAnswer ? "true" : "false"};
+	var showPopup = ${showPopup ? "true" : "false"};
+	var sliderAnswered = false;
+	var widgetAnswered = false;
+	var dragDropPresent = false;
+
+	function hookSliderInputs() {
+		var ranges = document.querySelectorAll("input[type=\\\"range\\\"]");
+		Array.prototype.forEach.call(ranges, function (el) {
+			function markAnswered() {
+				sliderAnswered = true;
+				el.setAttribute("data-answered", "1");
+				syncNextState();
+			}
+			el.addEventListener("input", markAnswered, true);
+			el.addEventListener("change", markAnswered, true);
+		});
+
+		// Covers custom slider widgets that proxy value changes internally.
+		document.addEventListener("pointerdown", function (ev) {
+			if (!ev.target) return;
+			if (ev.target.closest(".slider, .ui-slider, [class*=\\\"slider\\\"]")) {
+				sliderAnswered = true;
+				syncNextState();
+			}
+		}, true);
+	}
+
+	function isDragDropComplete() {
+		if (!dragDropPresent) return false;
+
+		var totalCards = document.querySelectorAll(".s2items .s2options .s2option").length;
+		var assignedCards = document.querySelectorAll(".s2items .s2targets .s2stack .s2option").length;
+		if (totalCards > 0) {
+			return assignedCards >= totalCards;
+		}
+
+		var controllerValues = document.querySelectorAll(".s2items .S2Controller dd");
+		if (controllerValues.length > 0) {
+			return Array.prototype.every.call(controllerValues, function (dd) {
+				return (dd.textContent || "").trim() !== "";
+			});
+		}
+
+		return false;
+	}
+
+	function hookDragDropInputs() {
+		var areas = document.querySelectorAll(".s2items.S2CardSort, .s2items.s2jsMultiSort");
+		dragDropPresent = areas.length > 0;
+		if (!dragDropPresent) return;
+
+		Array.prototype.forEach.call(areas, function (area) {
+			area.addEventListener("pointerdown", syncNextState, true);
+			area.addEventListener("mousedown", syncNextState, true);
+			area.addEventListener("touchstart", syncNextState, true);
+			area.addEventListener("keydown", syncNextState, true);
+
+			area.addEventListener("pointerup", function () {
+				syncNextState();
+			}, true);
+
+			area.addEventListener("drop", function () {
+				syncNextState();
+			}, true);
+
+			if (typeof MutationObserver !== "undefined") {
+				var observer = new MutationObserver(syncNextState);
+				observer.observe(area, { childList: true, subtree: true });
+			}
+		});
+	}
+
+	function hookChoiceWidgets() {
+		document.addEventListener("pointerdown", function (ev) {
+			if (!ev.target) return;
+			if (ev.target.closest(".selzoom .option, .selzoom img, .selzoom label")) {
+				widgetAnswered = true;
+				syncNextState();
+			}
+		}, true);
+
+		document.addEventListener("click", function (ev) {
+			if (!ev.target) return;
+			if (ev.target.closest(".selzoom .option, .selzoom img, .selzoom label")) {
+				widgetAnswered = true;
+				syncNextState();
+			}
+		}, true);
+	}
+
+  function hasUserAnswer() {
+		if (widgetAnswered) return true;
+
+		if (dragDropPresent) {
+				return isDragDropComplete();
+		}
+
+		var answeredRange = sliderAnswered || Array.prototype.some.call(
+			document.querySelectorAll("input[type=\\\"range\\\"]"),
+			function (el) { return el.getAttribute("data-answered") === "1" || el.value !== el.defaultValue; }
+		);
+		if (answeredRange) return true;
+
+    var checkedInput = document.querySelector("input[type=\\\"radio\\\"]:checked, input[type=\\\"checkbox\\\"]:checked");
+    if (checkedInput) return true;
+
+    var filledText = Array.prototype.some.call(
+      document.querySelectorAll("input[type=\\\"text\\\"], input[type=\\\"number\\\"], textarea"),
+      function (el) { return el.value && el.value.trim().length > 0; }
+    );
+    if (filledText) return true;
+
+		var chosenSelect = Array.prototype.some.call(document.querySelectorAll("select"), function (el) {
+			if (el.selectedIndex <= 0) return false;
+			var val = String(el.value);
+			return val !== "" && val !== "-9";
+		});
+    if (chosenSelect) return true;
+
+    return false;
+  }
+
+  function syncNextState() {
+    if (!requireAnswer) return;
+    var answered = hasUserAnswer();
+    btn.disabled = !answered;
+    btn.style.opacity = answered ? "1" : "0.55";
+    btn.style.cursor = answered ? "pointer" : "not-allowed";
+  }
+
+  if (requireAnswer) {
+		hookSliderInputs();
+		hookDragDropInputs();
+		hookChoiceWidgets();
+    syncNextState();
+    document.addEventListener("input", syncNextState, true);
+    document.addEventListener("change", syncNextState, true);
+  }
+
   var popupShown = false;
   btn.addEventListener("click", function (e) {
-    if (popupShown) return; 
-    e.preventDefault();     
+		if (requireAnswer && !hasUserAnswer()) {
+		e.preventDefault();
+		return;
+	}
+		if (!showPopup) return;
+    if (popupShown) return;
+    e.preventDefault();
     popupShown = true;
-    
+
     var overlay = document.createElement("div");
     overlay.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;";
-    
+
     var box = document.createElement("div");
     box.style.cssText = "background:linear-gradient(180deg,#ffffff 0%,#f7fbff 100%);padding:40px;border-radius:14px;text-align:center;max-width:360px;box-shadow:0 12px 40px rgba(0,0,0,0.28);font-family:sans-serif;transform:scale(.96);opacity:0;animation:popup-pop-in .22s ease-out forwards;";
-    
     box.style.position = "relative";
+
     box.innerHTML =
       "<style>@keyframes popup-pop-in{to{transform:scale(1);opacity:1;}}</style>" +
       "<div style=\\"position:absolute;top:12px;right:12px;width:34px;height:34px;\\">" +
@@ -551,15 +767,14 @@ document.addEventListener("DOMContentLoaded", function () {
     overlay.appendChild(box);
     document.body.appendChild(overlay);
 
-    var totalMs = 10000;
-    var remainingMs = totalMs;
-    var paused = false;
-    var closed = false;
-    var lastTick = Date.now();
-    var timerCircle = document.getElementById("popup-timer-circle");
-    var timerLabel = document.getElementById("popup-timer-label");
+    var totalMs      = 10000;
+    var remainingMs  = totalMs;
+    var paused       = false;
+    var closed       = false;
+    var lastTick     = Date.now();
+    var timerCircle  = document.getElementById("popup-timer-circle");
+    var timerLabel   = document.getElementById("popup-timer-label");
     var circumference = 2 * Math.PI * 14;
-
     timerCircle.style.strokeDasharray = String(circumference);
 
     function updateTimerVisual() {
@@ -568,170 +783,143 @@ document.addEventListener("DOMContentLoaded", function () {
       timerLabel.textContent = String(Math.ceil(Math.max(0, remainingMs) / 1000));
     }
 
-    function closePopupAndContinue() {
+    function closeAndContinue() {
       if (closed) return;
       closed = true;
       clearInterval(timerInterval);
-      if (overlay.parentNode) {
-        document.body.removeChild(overlay);
-      }
+      if (overlay.parentNode) document.body.removeChild(overlay);
       btn.click();
     }
 
-    box.addEventListener("mouseenter", function () {
-      paused = true;
-    });
-
-    box.addEventListener("mouseleave", function () {
-      paused = false;
-      lastTick = Date.now();
-    });
+    box.addEventListener("mouseenter", function () { paused = true; });
+    box.addEventListener("mouseleave", function () { paused = false; lastTick = Date.now(); });
 
     var timerInterval = setInterval(function () {
       if (paused) return;
       var now = Date.now();
-      remainingMs -= (now - lastTick);
+      remainingMs -= now - lastTick;
       lastTick = now;
-
-      if (remainingMs <= 0) {
-        remainingMs = 0;
-        updateTimerVisual();
-        closePopupAndContinue();
-        return;
-      }
-
+      if (remainingMs <= 0) { remainingMs = 0; updateTimerVisual(); closeAndContinue(); return; }
       updateTimerVisual();
     }, 100);
 
     updateTimerVisual();
-
-    document.getElementById("popup-continue").addEventListener("click", function () {
-      closePopupAndContinue();
-    });
+    document.getElementById("popup-continue").addEventListener("click", closeAndContinue);
   });
 });
 </script>`;
 }
 
-/**
- * Builds frequent-condition popup PHP for a specific trial.
- * @param {number} trialNum 1-based trial number.
- * @param {number} popupPhpIntID Internal SoSci php node id.
- * @returns {string} XML php block.
- */
-function buildFreqPopupPhp(trialNum, popupPhpIntID) {
-	const code = `$trialNum = ${trialNum};\n$points = value(id('V103', $trialNum));\n\n$html = '\n${buildPopupJs("this round!")}\n';\nhtml($html);`;
-	return buildPhpBlock(popupPhpIntID, code);
-}
+function universalPopupPhp(pageIdent, popupIntID, requireAnswer) {
+	return phpTag(
+		popupIntID,
+		`
+$pageIdent = '${pageIdent}';
 
-/**
- * Builds non-frequent-condition popup PHP for a specific trial.
- * The popup is only shown every 4th trial.
- * @param {number} trialNum 1-based trial number.
- * @param {number} popupPhpIntID Internal SoSci php node id.
- * @returns {string} XML php block.
- */
-function buildNonfPopupPhp(trialNum, popupPhpIntID) {
-	const code = `$trialNum = ${trialNum};\nif ($trialNum > 0 && $trialNum % 4 === 0) {\n    $index = $trialNum / 4;\n    $points = value(id('V104', $index));\n    $html = '\n${indent(buildPopupJs("over the last 4 rounds!"), 2)}\n    ';\n    html($html);\n}`;
-	return buildPhpBlock(popupPhpIntID, code);
-}
-
-/**
- * Assembles a full XML page for a trial.
- * @param {{
- *   ident: string,
- *   pageIntID: number,
- *   setup: any,
- *   question: { id: string, intID: number },
- *   mainText: null | { id: string, intID: number },
- *   fbTextIntID: null | number,
- *   popupPhpIntID: number
- * }} page Page metadata.
- * @param {number} pageNumber Display page number in comments.
- * @param {"freq" | "nonf"} mode Trial mode.
- * @param {number} trialNum 1-based trial number.
- * @returns {string} Full XML page block.
- */
-function buildTrialPage(page, pageNumber, mode, trialNum) {
-	const lines = [];
-	lines.push(`<!-- Page ${pageNumber} -->`);
-	lines.push(`<page ident="${page.ident}" intID="${page.pageIntID}">`);
-
-	const setupPhp = buildSetupPhp(page.setup);
-	if (setupPhp) lines.push(setupPhp);
-
-	lines.push(
-		`<question id="${page.question.id}" intID="${page.question.intID}" />`,
+$freqIndex = array_search($pageIdent, $freq_pages, true);
+if ($freqIndex !== false) {
+  $trialNum = $freqIndex + 1;
+  $points   = value(id('V103', $trialNum));
+  $html = '
+${popupScriptTag("this round!", requireAnswer, true)}
+';
+  html($html);
+} else {
+  $nonfIndex = array_search($pageIdent, $nonf_pages, true);
+  if ($nonfIndex !== false) {
+    $trialNum = $nonfIndex + 1;
+		$showPopup = ($trialNum > 0 && $trialNum % 4 === 0);
+		$points = 0;
+    if ($trialNum > 0 && $trialNum % 4 === 0) {
+      $index  = $trialNum / 4;
+      $points = value(id('V104', $index));
+    }
+		$html = '
+${popupScriptTag("over the last 4 rounds!", requireAnswer, false)}
+';
+		if ($showPopup) {
+			$html = '
+${popupScriptTag("over the last 4 rounds!", requireAnswer, true)}
+';
+		}
+		html($html);
+  }
+}`.trim(),
 	);
-
-	if (page.mainText) {
-		lines.push(buildTextBlock(page.mainText.id, page.mainText.intID));
-	}
-
-	if (page.fbTextIntID !== null) {
-		lines.push(buildTextBlock("FB01", page.fbTextIntID));
-	}
-
-	if (mode === "freq") {
-		lines.push(buildFreqPopupPhp(trialNum, page.popupPhpIntID));
-	} else {
-		lines.push(buildNonfPopupPhp(trialNum, page.popupPhpIntID));
-	}
-
-	lines.push(`</page>`);
-	return lines.join("\n");
 }
 
-/**
- * Builds the complete questionnaire XML document string.
- * @returns {string} Full XML document.
- */
-function buildQuestionnaireXml() {
+function trialPage(trial, pageNumber) {
+	const parts = [
+		`<!-- Page ${pageNumber} -->`,
+		`<page ident="${trial.ident}" intID="${trial.pageIntID}">`,
+		trial.setup && setupPhp(trial.setup),
+		`<question id="${trial.question.id}" intID="${trial.question.intID}" />`,
+		trial.mainText && textTag(trial.mainText.id, trial.mainText.intID),
+		trial.fbTextIntID !== null && textTag("FB01", trial.fbTextIntID),
+		universalPopupPhp(trial.ident, trial.popupIntID, trial.kind === "standard"),
+		`</page>`,
+	];
+
+	return parts.filter(Boolean).join("\n");
+}
+
+function buildXml() {
 	const pages = [];
 
-	pages.push(
-		`<!-- Page 1 -->\n<page ident="intro" intID="4">\n<html intID="42"><![CDATA[\n${introHtml}\n]]></html>\n</page>`,
-	);
+	pages.push(`<!-- Page 1 -->
+<page ident="intro" intID="4">
+<html intID="42">${cdata(INTRO_HTML)}</html>
+</page>`);
 
-	pages.push(
-		`<!-- Page 2 -->\n<page ident="rand" intID="1">\n<info>this page is not shown to the participants</info>\n<question id="V102" intID="2" />\n${buildPhpBlock(3, randPhp)}\n</page>`,
-	);
+	pages.push(`<!-- Page 2 -->
+<page ident="demo" intID="165">
+<html intID="110"><![CDATA[
+<p>Please let us know a bit about yourself</p>
+]]></html>
+<question id="D102" intID="109">
+<number>no</number>
+</question>
+<question id="D101" intID="166">
+<number>no</number>
+</question>
+</page>`);
 
-	freqPages.forEach((page, idx) => {
-		pages.push(buildTrialPage(page, idx + 3, "freq", idx + 1));
+	pages.push(`<!-- Page 3 -->
+<page ident="rand" intID="1">
+<info>this page is not shown to the participants</info>
+<question id="V102" intID="2" />
+${phpTag(3, RANDOMISATION_PHP)}
+</page>`);
+
+	TRIAL_PAGES.forEach((trial, i) => {
+		pages.push(trialPage(trial, i + 4));
 	});
 
-	pages.push(
-		`<!-- Page 19 -->\n<page ident="mid1" intID="7">\n<question id="Q101" intID="13" />\n</page>`,
-	);
+	const afterTrialsPageNumber = TRIAL_PAGES.length + 4;
 
-	nonfPages.forEach((page, idx) => {
-		pages.push(buildTrialPage(page, idx + 20, "nonf", idx + 1));
-	});
+	pages.push(`<!-- Page ${afterTrialsPageNumber} -->
+<page ident="fperf" intID="7">
+<question id="P101" intID="13" />
+</page>`);
 
-	pages.push(
-		`<!-- Page 36 -->\n<page ident="mid2" intID="10">\n<question id="Q102" intID="31" />\n</page>`,
-	);
+	pages.push(`<!-- Page ${afterTrialsPageNumber + 1} -->
+<page ident="q112" intID="163">
+<question id="Q112" intID="164" />
+</page>`);
+
+	pages.push(`<!-- Page ${afterTrialsPageNumber + 2} -->
+<page ident="nperf" intID="10">
+<question id="P102" intID="31" />
+</page>`);
 
 	return `<?xml version="1.0"?>\n<questionnaire>\n\n${pages.join("\n\n\n")}\n\n\n</questionnaire>\n`;
 }
 
-/**
- * Writes the generated XML to either the side-by-side file or the main XML.
- * @param {boolean} overwrite Whether to overwrite Questionare.xml.
- * @returns {string} The path that was written.
- */
-function writeOutput(overwrite) {
-	const xml = buildQuestionnaireXml();
-	const outputPath = overwrite ? OVERWRITE_OUTPUT_PATH : OUTPUT_PATH;
-	fs.writeFileSync(outputPath, xml, "utf8");
-	return outputPath;
-}
-
 const overwrite = process.argv.includes("--overwrite");
-const writtenPath = writeOutput(overwrite);
+const outputPath = overwrite ? PATHS.overwrite : PATHS.default;
 
-console.log(`Generated questionnaire XML at: ${writtenPath}`);
+fs.writeFileSync(outputPath, buildXml(), "utf8");
+console.log(`Generated questionnaire XML at: ${outputPath}`);
 if (!overwrite) {
 	console.log("Use --overwrite to replace Questionare.xml directly.");
 }
