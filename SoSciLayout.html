@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html class="%html.css.class%">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<style type="text/css">
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding: 0;
+    margin: 0;
+    background-color: %color.0%;
+    background-color: var(--s2color0);
+}
+html {
+    -webkit-text-size-adjust: 100%;
+}
+hr {
+    margin: 42px 0;
+}
+div.s2t-inner {
+    max-width: %width%;
+    box-sizing: border-box;
+    padding: 0 0.8em;
+    margin: 0 auto;
+}
+div#S2Progress {
+    background-color: %color.4%;
+    background-color: var(--s2color4);
+    padding: 6px 0;
+}
+div.progressbar div.progress {
+    border-color: %color.7%;
+    border-color: var(--s2color.7);
+}
+div.progressbar div.progress {
+    background-color: %color.5%;
+    border-color: var(--s2color.5);
+}
+div.progressbar {
+    height: 20px;
+    border-radius: 0.25em;
+}
+div.progressbar div.progresstext {
+    font-size: 16px;
+}
+div#s2t-progress {
+    max-width: 320px;
+    margin: 0 auto;
+    border-radius: 0.25em;
+    background-color: %color.0%;
+    background-color: var(--s2color0);
+}
+div#S2Logos {
+    display: flex;
+    justify-content: space-between;
+    /*padding: 0.8rem 1.6rem;*/
+}
+div#S2Logos img {
+    max-height: 12vh;
+    width: auto;
+}
+
+div#addtional_logos {
+    display: flex;
+    align-items: center;
+}
+
+div#addtional_logos img {
+    padding: 1rem;
+    max-width: 15vw;
+    max-height: 8vh;
+}
+
+img.s2headerImage {
+    width: 100%;
+}
+div#S2Outer {
+   flex: 1;
+}
+
+div#s2t-content {
+    padding: 1rem 0;
+}
+div.s2t-questionary { 
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  position: relative;
+  min-width: 300px;
+  margin: 0 auto 0px auto;
+  min-height: 65vh;
+}
+div#s2t-controls {
+    margin: 1.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 1em 2em;
+    flex-wrap: wrap;
+}
+div#s2t-footer{
+    background-color: #585858;
+    color: white;
+    height: 8vh;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: space-between;
+}
+
+div#s2t-footer div {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    height: inherit;
+    justify-content: center;
+    align-content: space-around;
+}
+
+div#s2t-footer a {
+    color: white;
+    text-decoration: none;
+}
+
+div#s2t-footer a:hover {
+    color: #50aadc;
+}
+
+div#s2t-imprint {
+}
+
+/* Center header and footer on smartphone */
+@media (max-width: 450px) {
+	div#s2t-controls { text-align: center }
+	div#s2t-imprint { text-align: center }
+	div#s2t-footer { height: 13vh; }
+}
+@media (min-width: 576px) {
+    div.s2t-inner {
+        padding-left: 1.6em;
+        padding-right: 1.6em;
+    }
+    div#s2t-progress {
+      margin-right: 0;
+    }
+}
+
+h1, h2, h3 {
+    font-weight: 400;
+}
+h1 {
+	font-size: 42px;
+	margin: 42px 0 22px;
+}
+td > h1:first-child {
+	margin-top: 0;
+}
+h2 {
+	font-size: 32px;
+	margin: 42px 0 18px;
+}
+h3 {
+  font-size: 24px;
+  line-height: 1.2;
+  margin: 32px 0 16px;
+}
+
+button,
+input.button,
+label.button {
+    border-radius: 0.3em;
+}
+input.button:hover,
+button:hover,
+button.s2buttonInverse {
+    background-color: %color.6%;
+    background-color: var(--s2color6);
+    color: %color.1%;
+    color: var(--s2color1);
+}
+input.button.s2buttonNext:hover,
+button.s2buttonNext:hover {
+    background-color: #66CC66;
+    color: white;
+}
+button:disabled,
+button:disabled:hover {
+    background-color: #CCCCCC;
+    color: white;
+    border-color: #666666;
+}
+div.buttonControl {
+    justify-content: center;
+}
+div.buttonControl input.button {
+    padding-top: 6px;
+    padding-bottom: 6px;
+    border-radius: 0.3em;
+}
+
+input[type="radio"] {
+  box-sizing: border-box;
+  width: 1.25em;
+  height: 1.25em;
+  border: 2px %color.8% solid;
+  border-color: var(--s2color8);
+  border-radius: 50%;
+  background-color: %color.0%;
+  background-color: var(--s2color0);
+  appearance: none;
+}
+input[type="radio"]::before {
+  box-sizing: border-box;
+  display: block;
+  content: "";
+  width: 100%;
+  height: 100%;
+  border: 0 none;
+  border-radius: 50%;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  box-shadow: inset 1em 1em %color.5%;
+  box-shadow: inset 1em 1em var(--s2color5);
+}
+input[type="radio"]:checked::before {
+  content: "";
+  transform: scale(0.8);
+  box-shadow: inset 1em 1em %color.4%;
+  box-shadow: inset 1em 1em var(--s2color4);
+}
+
+
+input[type="checkbox"] {
+  box-sizing: border-box;
+  width: 1.25em;
+  height: 1.25em;
+  color: %color.4%;
+  color: var(--s2color4);
+  appearance: none;
+  border: 2px %color.8% solid;
+  border-color: var(--s2color8);
+  border-radius: 0;
+  background-color: %color.0%;
+  background-color: var(--s2color0);
+}
+
+input[type="checkbox"]:before {
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    height: 100%;
+    transform: scale(0);
+    transition: 120ms transform ease-in-out;
+    content: "✓";
+    font-weight: bold;
+    text-align: center;
+    color: white;
+    box-shadow: inset 1em 1em %color.4%;
+    box-shadow: inset 1em 1em var(--s2color4);
+    line-height: 1;
+}
+input[type="checkbox"]:checked::before {
+    content: "✓";
+    transform: scale(1.1);
+}
+
+input[type="text"],
+input[type="number"],
+input[type="password"],
+input[type="date"],
+input[type="time"],
+input[type="email"],
+input[type="file"],
+textarea,
+div.textinput textarea,
+table.question td.textinput textarea,
+div.textinput input[type="text"],
+table.question td.textinput input[type="text"] {
+    appearance: none;
+    padding: 0.15em 0.4em;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    border: 1px solid %color.7%;
+    border-color: var(--s2color7);
+    border-radius: 0.3em;
+    transition: ease-in-out 0.15s;
+}
+select {
+    background-color: white;
+    padding: 0.15em 0.6em;
+    border: 1px solid %color.7%;
+    border-color: var(--s2color7);
+    border-radius: 0.3em;
+}
+
+div.s2fail input[type="radio"],
+div.s2fail input[type="checkbox"] {
+    outline: 1px solid %color.2%;
+    outline-color: var(--s2color2);
+}
+input[type="radio"]:focus,
+div.s2fail input[type="radio"]:focus,
+input[type="checkbox"]:focus,
+div.s2fail input[type="checkbox"]:focus,
+input[type="text"]:focus,
+div.s2fail input[type="text"]:focus,
+select:focus,
+div.s2fail select:focus,
+textarea:focus,
+div.s2fail textarea:focus,
+input.button:focus,
+button:focus,
+.s2iSelection.cards div.option.focus {
+    /* box-shadow: inset 0 1px 1px rgba(0,0,0,0.075),0 0 8px rgba(102,175,233,0.6); */
+    outline: 2px solid %color.6%;
+    outline-color: var(--s2color6);
+}
+
+.s2iSelection.dynamic div.option div.input {
+    padding-top: 0.3em;
+    padding-bottom: 0.3em;
+}
+
+table.question th.separateB,
+table.question td.separateB,
+table.question div.separateB,
+div.separateB, div.s2sepH {
+  border-top: 1px solid #C8C8C8;
+}
+
+div.feedback,
+div.content.box,
+div.items.box {
+  border-radius: 0.3em;
+}
+div.info div.title {
+  border-radius: 0.3em 0.3em 0 0;
+}
+div.info div.symbol div.content {
+  border-radius: 0 0 0.3em 0.3em;
+}
+div.spacingV {
+  margin: 0.4em 0;
+}
+div.question div.opener {
+    margin-bottom: 0.25em;
+}
+</style>
+
+<link type="placeholder" href="head">
+
+<style>
+/* Accessibility */
+html.s2display-inverse {
+    --s2color0: #000000;
+    --s2color1: #FFFFFF;
+    --s2color2: #CC3300;
+    --s2color3: #333333;
+    --s2color4: #6688CC;
+    --s2color5: #3366AA;
+    --s2color6: #FF9900;
+    --s2color7: #666666;
+    --s2color8: #E0E0E0;
+}
+html.s2display-inverse input[type="radio"]:checked::before {
+    box-shadow: inset 1em 1em #EEEEFF;
+}
+html.s2display-inverse input[type="checkbox"]:checked::before {
+    color: #000000;
+    box-shadow: inset 1em 1em #CCCCFF;
+}
+html.s2display-inverse span.Text2SpeechButton,
+html.s2display-inverse img.s2accessButton {
+    background-color: #FFFFFF;
+}
+html.s2display-inverse button.s2accessButton {
+    background-color: %color.4%;
+}
+
+/*
+ * Dark Mode disabled due to unexpected results with some texts
+ * and a lack of user control on Chrome
+@media (prefers-color-scheme: dark) {
+    :root {
+        --s2color0: #000000;
+        --s2color1: #FFFFFF;
+        --s2color2: #CC3300;
+        --s2color3: #333333;
+        --s2color4: #6688CC;
+        --s2color5: #3366AA;
+        --s2color6: #FF9900;
+        --s2color7: #666666;
+        --s2color8: #E0E0E0;
+    }
+    html.s2display-inverse {
+        --s2color0: %color.0%;
+        --s2color1: %color.1%;
+        --s2color2: %color.2%;
+        --s2color3: %color.3%;
+        --s2color4: %color.4%;
+        --s2color5: %color.5%;
+        --s2color6: %color.6%;
+        --s2color7: %color.7%;
+        --s2color8: %color.8%;
+    }
+
+    input[type="radio"]:checked::before {
+      box-shadow: inset 1em 1em #CCCCFF;
+    }
+    html.s2display-inverse input[type="radio"]:checked::before {
+      box-shadow: inset 1em 1em %color.4%;
+    }
+
+    input[type="checkbox"]:checked::before {
+        color: #000000;
+        box-shadow: inset 1em 1em #CCCCFF;
+    }
+    html.s2display-inverse input[type="checkbox"]:checked::before {
+        color: #FFFFFF;
+        box-shadow: inset 1em 1em %color.4%;
+    }
+
+    span.Text2SpeechButton,
+    img.s2accessButton  {
+        background-color: #FFFFFF;
+    }
+    button.s2accessButton {
+        background-color: %color.4%;
+    }
+    html.s2display-inverse button.s2accessButton {
+        background-color: transparent;
+    }
+}
+*/
+
+div.progressbar {
+    border-color: %color.8%;
+    border-color: var(--s2color.8);
+}
+
+html.s2display-zoom {
+    font-size: 1.25em;
+}
+html.s2display-zoom body,
+html.s2display-zoom button,
+html.s2display-zoom input {
+    font-size: 24px;
+    line-height: 1.5;
+}
+</style>
+</head>
+<body>
+<!-- Place this in your page's <head> or top of <body> -->
+<noscript>
+  <div style="
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  ">
+    <div style="
+      background: #fff;
+      border-radius: 8px;
+      padding: 32px 40px;
+      max-width: 420px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    ">
+      <div style="font-size: 48px; margin-bottom: 12px;">⚠️</div>
+      <h2 style="margin: 0 0 12px; font-family: sans-serif; color: #222;">
+        JavaScript Required
+      </h2>
+      <p style="font-family: sans-serif; color: #555; line-height: 1.5; margin: 0 0 20px;">
+        This survey contains interactive elements that require JavaScript to be enabled in your browser. Please enable JavaScript and reload the page to continue.
+      </p>
+      <p style="font-family: sans-serif; font-size: 13px; color: #999; margin: 0;">
+        Need help? Search for <strong>"enable JavaScript [your browser name]"</strong> for instructions.
+      </p>
+    </div>
+  </div>
+</noscript>
+<div id="S2Outer">
+<div id="S2Logos" class="s2t-inner">
+%logo%
+<div id="addtional_logos">
+    <img src="https://www.soco.ruhr-uni-bochum.de/soco/mam/images/soco_rub_logo-kl.png" alt="Social Cognition logo">
+    <img src="Logo_RUB_BLAU_rgb.jpg">
+</div>
+<!-- add <img> Tags for additional logos here -->
+</div>
+<div class="s2t-inner">
+    %header.image.img%
+</div>
+%form.open%
+<div id="S2Progress">
+    <div class="s2t-inner">
+	<div id="s2t-progress">%progress%<span><!-- empty span required for IE --></span></div>
+    </div>
+</div>
+<div class="s2t-questionary s2t-inner">
+<div id="s2t-content">
+%questionnaire%
+</div>
+<div id="s2t-controls">
+%button.speak%
+%button.inverse%
+%button.zoom%
+%button.easy%
+%button.language%
+%button.break%
+%button.leave%
+%button.control%
+</div>
+</div>
+%form.close%
+</div>
+<div id="s2t-footer">
+%imprint%
+</div>
+
+</body>
+</html>
