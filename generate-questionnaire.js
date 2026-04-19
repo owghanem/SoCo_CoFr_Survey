@@ -78,325 +78,359 @@ if (!isset($points_freq)) {
 }`;
 
 const freqPages = [
-  {
-    ident: "freq1",
-    pageIntID: 22,
-    setup: { type: "measure", intID: 25, varName: "G103_01", maxMm: 500, goalMm: 145 },
-    question: { id: "G103", intID: 24 },
-    mainText: { id: "MT01", intID: 23 },
-    fbTextIntID: null,
-    popupPhpIntID: 130,
-  },
-  {
-    ident: "freq2",
-    pageIntID: 70,
-    setup: { type: "measure", intID: 71, varName: "G103_02", maxMm: 500, goalMm: 278 },
-    question: { id: "G103", intID: 72 },
-    mainText: { id: "MT01", intID: 73 },
-    fbTextIntID: 61,
-    popupPhpIntID: 131,
-  },
-  {
-    ident: "freq3",
-    pageIntID: 5,
-    setup: {
-      type: "geo",
-      intID: 26,
-      answer: "United States of America",
-      varName: "G101_01",
-      lat: "32.0117548",
-      lng: "-93.9271803",
-    },
-    question: { id: "G101", intID: 11 },
-    mainText: { id: "GG01", intID: 18 },
-    fbTextIntID: 62,
-    popupPhpIntID: 132,
-  },
-  {
-    ident: "freq4",
-    pageIntID: 82,
-    setup: {
-      type: "geo",
-      intID: 83,
-      answer: "Greece",
-      varName: "G101_02",
-      lat: "37.6047259",
-      lng: "23.3298282",
-    },
-    question: { id: "G101", intID: 84 },
-    mainText: { id: "GG01", intID: 85 },
-    fbTextIntID: 63,
-    popupPhpIntID: 133,
-  },
-  {
-    ident: "freq5",
-    pageIntID: 27,
-    setup: { type: "shape", intID: 30, img: "prezel.png", varName: "G102_01" },
-    question: { id: "G102", intID: 28 },
-    mainText: { id: "SH01", intID: 29 },
-    fbTextIntID: 66,
-    popupPhpIntID: 134,
-  },
-  {
-    ident: "freq6",
-    pageIntID: 94,
-    setup: { type: "shape", intID: 95, img: "banana_1.png", varName: "G102_02" },
-    question: { id: "G102", intID: 96 },
-    mainText: { id: "SH01", intID: 97 },
-    fbTextIntID: 68,
-    popupPhpIntID: 135,
-  },
-  {
-    ident: "freq7",
-    pageIntID: 16,
-    setup: null,
-    question: { id: "A101", intID: 17 },
-    mainText: null,
-    fbTextIntID: 106,
-    popupPhpIntID: 136,
-  },
-  {
-    ident: "freq8",
-    pageIntID: 6,
-    setup: null,
-    question: { id: "A107", intID: 12 },
-    mainText: null,
-    fbTextIntID: 107,
-    popupPhpIntID: 137,
-  },
-  {
-    ident: "freq9",
-    pageIntID: 32,
-    setup: null,
-    question: { id: "A103", intID: 43 },
-    mainText: null,
-    fbTextIntID: 108,
-    popupPhpIntID: 138,
-  },
-  {
-    ident: "freq10",
-    pageIntID: 8,
-    setup: null,
-    question: { id: "A109", intID: 14 },
-    mainText: null,
-    fbTextIntID: 109,
-    popupPhpIntID: 139,
-  },
-  {
-    ident: "freq11",
-    pageIntID: 9,
-    setup: null,
-    question: { id: "A105", intID: 15 },
-    mainText: null,
-    fbTextIntID: 20,
-    popupPhpIntID: 140,
-  },
-  {
-    ident: "freq12",
-    pageIntID: 38,
-    setup: null,
-    question: { id: "A201", intID: 49 },
-    mainText: null,
-    fbTextIntID: 21,
-    popupPhpIntID: 141,
-  },
-  {
-    ident: "freq13",
-    pageIntID: 39,
-    setup: null,
-    question: { id: "A207", intID: 50 },
-    mainText: null,
-    fbTextIntID: 110,
-    popupPhpIntID: 142,
-  },
-  {
-    ident: "freq14",
-    pageIntID: 40,
-    setup: null,
-    question: { id: "A203", intID: 51 },
-    mainText: null,
-    fbTextIntID: 111,
-    popupPhpIntID: 143,
-  },
-  {
-    ident: "freq15",
-    pageIntID: 41,
-    setup: null,
-    question: { id: "A209", intID: 52 },
-    mainText: null,
-    fbTextIntID: 112,
-    popupPhpIntID: 144,
-  },
-  {
-    ident: "freq16",
-    pageIntID: 53,
-    setup: null,
-    question: { id: "A205", intID: 64 },
-    mainText: null,
-    fbTextIntID: 113,
-    popupPhpIntID: 145,
-  },
+	{
+		ident: "freq1",
+		pageIntID: 22,
+		setup: {
+			type: "measure",
+			intID: 25,
+			answerVar: "G103_01",
+      goalVar: "G103_02",
+			maxMm: 500,
+		},
+		question: { id: "G103", intID: 24 },
+		mainText: { id: "MT01", intID: 23 },
+		fbTextIntID: null,
+		popupPhpIntID: 130,
+	},
+	{
+		ident: "freq2",
+		pageIntID: 70,
+		setup: {
+			type: "measure",
+			intID: 71,
+			answerVar: "G103_03",
+      goalVar: "G103_04",
+			maxMm: 500,
+		},
+		question: { id: "G103", intID: 72 },
+		mainText: { id: "MT01", intID: 73 },
+		fbTextIntID: 61,
+		popupPhpIntID: 131,
+	},
+	{
+		ident: "freq3",
+		pageIntID: 5,
+		setup: {
+			type: "geo",
+			intID: 26,
+			answer: "United States of America",
+			varName: "G101_01",
+			lat: "32.0117548",
+			lng: "-93.9271803",
+		},
+		question: { id: "G101", intID: 11 },
+		mainText: { id: "GG01", intID: 18 },
+		fbTextIntID: 62,
+		popupPhpIntID: 132,
+	},
+	{
+		ident: "freq4",
+		pageIntID: 82,
+		setup: {
+			type: "geo",
+			intID: 83,
+			answer: "Greece",
+			varName: "G101_02",
+			lat: "37.6047259",
+			lng: "23.3298282",
+		},
+		question: { id: "G101", intID: 84 },
+		mainText: { id: "GG01", intID: 85 },
+		fbTextIntID: 63,
+		popupPhpIntID: 133,
+	},
+	{
+		ident: "freq5",
+		pageIntID: 27,
+		setup: { type: "shape", intID: 30, img: "prezel.png", varName: "G102_01" },
+		question: { id: "G102", intID: 28 },
+		mainText: { id: "SH01", intID: 29 },
+		fbTextIntID: 66,
+		popupPhpIntID: 134,
+	},
+	{
+		ident: "freq6",
+		pageIntID: 94,
+		setup: {
+			type: "shape",
+			intID: 95,
+			img: "banana_1.png",
+			varName: "G102_02",
+		},
+		question: { id: "G102", intID: 96 },
+		mainText: { id: "SH01", intID: 97 },
+		fbTextIntID: 68,
+		popupPhpIntID: 135,
+	},
+	{
+		ident: "freq7",
+		pageIntID: 16,
+		setup: null,
+		question: { id: "A101", intID: 17 },
+		mainText: null,
+		fbTextIntID: 106,
+		popupPhpIntID: 136,
+	},
+	{
+		ident: "freq8",
+		pageIntID: 6,
+		setup: null,
+		question: { id: "A107", intID: 12 },
+		mainText: null,
+		fbTextIntID: 107,
+		popupPhpIntID: 137,
+	},
+	{
+		ident: "freq9",
+		pageIntID: 32,
+		setup: null,
+		question: { id: "A103", intID: 43 },
+		mainText: null,
+		fbTextIntID: 108,
+		popupPhpIntID: 138,
+	},
+	{
+		ident: "freq10",
+		pageIntID: 8,
+		setup: null,
+		question: { id: "A109", intID: 14 },
+		mainText: null,
+		fbTextIntID: 109,
+		popupPhpIntID: 139,
+	},
+	{
+		ident: "freq11",
+		pageIntID: 9,
+		setup: null,
+		question: { id: "A105", intID: 15 },
+		mainText: null,
+		fbTextIntID: 20,
+		popupPhpIntID: 140,
+	},
+	{
+		ident: "freq12",
+		pageIntID: 38,
+		setup: null,
+		question: { id: "A201", intID: 49 },
+		mainText: null,
+		fbTextIntID: 21,
+		popupPhpIntID: 141,
+	},
+	{
+		ident: "freq13",
+		pageIntID: 39,
+		setup: null,
+		question: { id: "A207", intID: 50 },
+		mainText: null,
+		fbTextIntID: 110,
+		popupPhpIntID: 142,
+	},
+	{
+		ident: "freq14",
+		pageIntID: 40,
+		setup: null,
+		question: { id: "A203", intID: 51 },
+		mainText: null,
+		fbTextIntID: 111,
+		popupPhpIntID: 143,
+	},
+	{
+		ident: "freq15",
+		pageIntID: 41,
+		setup: null,
+		question: { id: "A209", intID: 52 },
+		mainText: null,
+		fbTextIntID: 112,
+		popupPhpIntID: 144,
+	},
+	{
+		ident: "freq16",
+		pageIntID: 53,
+		setup: null,
+		question: { id: "A205", intID: 64 },
+		mainText: null,
+		fbTextIntID: 113,
+		popupPhpIntID: 145,
+	},
 ];
 
 const nonfPages = [
-  {
-    ident: "nonf1",
-    pageIntID: 74,
-    setup: { type: "measure", intID: 75, varName: "G103_03", maxMm: 500, goalMm: 322 },
-    question: { id: "G103", intID: 76 },
-    mainText: { id: "MT01", intID: 77 },
-    fbTextIntID: 114,
-    popupPhpIntID: 146,
-  },
-  {
-    ident: "nonf2",
-    pageIntID: 78,
-    setup: { type: "measure", intID: 79, varName: "G103_04", maxMm: 500, goalMm: 467 },
-    question: { id: "G103", intID: 80 },
-    mainText: { id: "MT01", intID: 81 },
-    fbTextIntID: 115,
-    popupPhpIntID: 147,
-  },
-  {
-    ident: "nonf3",
-    pageIntID: 86,
-    setup: {
-      type: "geo",
-      intID: 87,
-      answer: "Canada",
-      varName: "G101_03",
-      lat: "53.1995399",
-      lng: "-105.3321598",
-    },
-    question: { id: "G101", intID: 88 },
-    mainText: { id: "GG01", intID: 89 },
-    fbTextIntID: 116,
-    popupPhpIntID: 148,
-  },
-  {
-    ident: "nonf4",
-    pageIntID: 90,
-    setup: {
-      type: "geo",
-      intID: 91,
-      answer: "Uruguay",
-      varName: "G101_04",
-      lat: "-30.4625891",
-      lng: "-56.9016809",
-    },
-    question: { id: "G101", intID: 92 },
-    mainText: { id: "GG01", intID: 93 },
-    fbTextIntID: 117,
-    popupPhpIntID: 149,
-  },
-  {
-    ident: "nonf5",
-    pageIntID: 98,
-    setup: { type: "shape", intID: 99, img: "croissant.png", varName: "G102_03" },
-    question: { id: "G102", intID: 100 },
-    mainText: { id: "SH01", intID: 101 },
-    fbTextIntID: 118,
-    popupPhpIntID: 150,
-  },
-  {
-    ident: "nonf6",
-    pageIntID: 102,
-    setup: { type: "shape", intID: 103, img: "apple.png", varName: "G102_04" },
-    question: { id: "G102", intID: 104 },
-    mainText: { id: "SH01", intID: 105 },
-    fbTextIntID: 119,
-    popupPhpIntID: 151,
-  },
-  {
-    ident: "nonf7",
-    pageIntID: 33,
-    setup: null,
-    question: { id: "A106", intID: 44 },
-    mainText: null,
-    fbTextIntID: 120,
-    popupPhpIntID: 152,
-  },
-  {
-    ident: "nonf8",
-    pageIntID: 34,
-    setup: null,
-    question: { id: "A102", intID: 45 },
-    mainText: null,
-    fbTextIntID: 121,
-    popupPhpIntID: 153,
-  },
-  {
-    ident: "nonf9",
-    pageIntID: 35,
-    setup: null,
-    question: { id: "A108", intID: 46 },
-    mainText: null,
-    fbTextIntID: 122,
-    popupPhpIntID: 154,
-  },
-  {
-    ident: "nonf10",
-    pageIntID: 36,
-    setup: null,
-    question: { id: "A104", intID: 47 },
-    mainText: null,
-    fbTextIntID: 123,
-    popupPhpIntID: 155,
-  },
-  {
-    ident: "nonf11",
-    pageIntID: 37,
-    setup: null,
-    question: { id: "A110", intID: 48 },
-    mainText: null,
-    fbTextIntID: 124,
-    popupPhpIntID: 156,
-  },
-  {
-    ident: "nonf12",
-    pageIntID: 54,
-    setup: null,
-    question: { id: "A206", intID: 65 },
-    mainText: null,
-    fbTextIntID: 125,
-    popupPhpIntID: 157,
-  },
-  {
-    ident: "nonf13",
-    pageIntID: 55,
-    setup: null,
-    question: { id: "A202", intID: 59 },
-    mainText: null,
-    fbTextIntID: 126,
-    popupPhpIntID: 158,
-  },
-  {
-    ident: "nonf14",
-    pageIntID: 56,
-    setup: null,
-    question: { id: "A208", intID: 67 },
-    mainText: null,
-    fbTextIntID: 127,
-    popupPhpIntID: 159,
-  },
-  {
-    ident: "nonf15",
-    pageIntID: 57,
-    setup: null,
-    question: { id: "A204", intID: 60 },
-    mainText: null,
-    fbTextIntID: 128,
-    popupPhpIntID: 160,
-  },
-  {
-    ident: "nonf16",
-    pageIntID: 58,
-    setup: null,
-    question: { id: "A210", intID: 69 },
-    mainText: null,
-    fbTextIntID: 129,
-    popupPhpIntID: 161,
-  },
+	{
+		ident: "nonf1",
+		pageIntID: 74,
+		setup: {
+			type: "measure",
+			intID: 75,
+			answerVar: "G103_05",
+      goalVar: "G103_06",
+			maxMm: 500,
+		},
+		question: { id: "G103", intID: 76 },
+		mainText: { id: "MT01", intID: 77 },
+		fbTextIntID: 114,
+		popupPhpIntID: 146,
+	},
+	{
+		ident: "nonf2",
+		pageIntID: 78,
+		setup: {
+			type: "measure",
+			intID: 79,
+      answerVar: "G103_07",
+			goalVar: "G103_08",
+			maxMm: 500,
+		},
+		question: { id: "G103", intID: 80 },
+		mainText: { id: "MT01", intID: 81 },
+		fbTextIntID: 115,
+		popupPhpIntID: 147,
+	},
+	{
+		ident: "nonf3",
+		pageIntID: 86,
+		setup: {
+			type: "geo",
+			intID: 87,
+			answer: "Canada",
+			varName: "G101_03",
+			lat: "53.1995399",
+			lng: "-105.3321598",
+		},
+		question: { id: "G101", intID: 88 },
+		mainText: { id: "GG01", intID: 89 },
+		fbTextIntID: 116,
+		popupPhpIntID: 148,
+	},
+	{
+		ident: "nonf4",
+		pageIntID: 90,
+		setup: {
+			type: "geo",
+			intID: 91,
+			answer: "Uruguay",
+			varName: "G101_04",
+			lat: "-30.4625891",
+			lng: "-56.9016809",
+		},
+		question: { id: "G101", intID: 92 },
+		mainText: { id: "GG01", intID: 93 },
+		fbTextIntID: 117,
+		popupPhpIntID: 149,
+	},
+	{
+		ident: "nonf5",
+		pageIntID: 98,
+		setup: {
+			type: "shape",
+			intID: 99,
+			img: "croissant.png",
+			varName: "G102_03",
+		},
+		question: { id: "G102", intID: 100 },
+		mainText: { id: "SH01", intID: 101 },
+		fbTextIntID: 118,
+		popupPhpIntID: 150,
+	},
+	{
+		ident: "nonf6",
+		pageIntID: 102,
+		setup: { type: "shape", intID: 103, img: "apple.png", varName: "G102_04" },
+		question: { id: "G102", intID: 104 },
+		mainText: { id: "SH01", intID: 105 },
+		fbTextIntID: 119,
+		popupPhpIntID: 151,
+	},
+	{
+		ident: "nonf7",
+		pageIntID: 33,
+		setup: null,
+		question: { id: "A106", intID: 44 },
+		mainText: null,
+		fbTextIntID: 120,
+		popupPhpIntID: 152,
+	},
+	{
+		ident: "nonf8",
+		pageIntID: 34,
+		setup: null,
+		question: { id: "A102", intID: 45 },
+		mainText: null,
+		fbTextIntID: 121,
+		popupPhpIntID: 153,
+	},
+	{
+		ident: "nonf9",
+		pageIntID: 35,
+		setup: null,
+		question: { id: "A108", intID: 46 },
+		mainText: null,
+		fbTextIntID: 122,
+		popupPhpIntID: 154,
+	},
+	{
+		ident: "nonf10",
+		pageIntID: 36,
+		setup: null,
+		question: { id: "A104", intID: 47 },
+		mainText: null,
+		fbTextIntID: 123,
+		popupPhpIntID: 155,
+	},
+	{
+		ident: "nonf11",
+		pageIntID: 37,
+		setup: null,
+		question: { id: "A110", intID: 48 },
+		mainText: null,
+		fbTextIntID: 124,
+		popupPhpIntID: 156,
+	},
+	{
+		ident: "nonf12",
+		pageIntID: 54,
+		setup: null,
+		question: { id: "A206", intID: 65 },
+		mainText: null,
+		fbTextIntID: 125,
+		popupPhpIntID: 157,
+	},
+	{
+		ident: "nonf13",
+		pageIntID: 55,
+		setup: null,
+		question: { id: "A202", intID: 59 },
+		mainText: null,
+		fbTextIntID: 126,
+		popupPhpIntID: 158,
+	},
+	{
+		ident: "nonf14",
+		pageIntID: 56,
+		setup: null,
+		question: { id: "A208", intID: 67 },
+		mainText: null,
+		fbTextIntID: 127,
+		popupPhpIntID: 159,
+	},
+	{
+		ident: "nonf15",
+		pageIntID: 57,
+		setup: null,
+		question: { id: "A204", intID: 60 },
+		mainText: null,
+		fbTextIntID: 128,
+		popupPhpIntID: 160,
+	},
+	{
+		ident: "nonf16",
+		pageIntID: 58,
+		setup: null,
+		question: { id: "A210", intID: 69 },
+		mainText: null,
+		fbTextIntID: 129,
+		popupPhpIntID: 161,
+	},
 ];
 
 /**
@@ -406,11 +440,11 @@ const nonfPages = [
  * @returns {string} Indented text.
  */
 function indent(text, level = 0) {
-  const prefix = "  ".repeat(level);
-  return text
-    .split("\n")
-    .map((line) => (line.length ? `${prefix}${line}` : line))
-    .join("\n");
+	const prefix = "  ".repeat(level);
+	return text
+		.split("\n")
+		.map((line) => (line.length ? `${prefix}${line}` : line))
+		.join("\n");
 }
 
 /**
@@ -420,7 +454,7 @@ function indent(text, level = 0) {
  * @returns {string} XML php block.
  */
 function buildPhpBlock(intID, code) {
-  return `<php intID="${intID}"><![CDATA[\n${code}\n]]></php>`;
+	return `<php intID="${intID}"><![CDATA[\n${code}\n]]></php>`;
 }
 
 /**
@@ -430,7 +464,7 @@ function buildPhpBlock(intID, code) {
  * @returns {string} XML text block.
  */
 function buildTextBlock(id, intID) {
-  return `<text id="${id}" intID="${intID}">\n\t<spacing>default</spacing>\n</text>`;
+	return `<text id="${id}" intID="${intID}">\n\t<spacing>default</spacing>\n</text>`;
 }
 
 /**
@@ -449,30 +483,30 @@ function buildTextBlock(id, intID) {
  * @returns {string} XML php block or empty string when no setup is required.
  */
 function buildSetupPhp(setup) {
-  if (!setup) return "";
+	if (!setup) return "";
 
-  if (setup.type === "measure") {
-    return buildPhpBlock(
-      setup.intID,
-      `$var = '${setup.varName}';\n$maxMm = ${setup.maxMm ?? 500};\n$goalMm = ${setup.goalMm ?? 150};\n\nreplace('%var%', $var);\nreplace('%maxMm%', $maxMm);\nreplace('%goalMm%', $goalMm);`
-    );
-  }
+	if (setup.type === "measure") {
+		return buildPhpBlock(
+			setup.intID,
+			`$var = '${setup.varName}';\n$maxMm = ${setup.maxMm ?? 500};\n$goalMm = ${setup.goalMm ?? 150};\n\nreplace('%var%', $var);\nreplace('%maxMm%', $maxMm);\nreplace('%goalMm%', $goalMm);`,
+		);
+	}
 
-  if (setup.type === "geo") {
-    return buildPhpBlock(
-      setup.intID,
-      `$answer = '${setup.answer}';\n$var = '${setup.varName}';\n$lat = '${setup.lat}';\n$lng = '${setup.lng}';\n$api_key = '${API_KEY}';\n\nreplace('%api_key%', $api_key);\nreplace('%lat%', $lat);\nreplace('%lng%', $lng);\nreplace('%answer%', $answer);\nreplace('%var%', $var);`
-    );
-  }
+	if (setup.type === "geo") {
+		return buildPhpBlock(
+			setup.intID,
+			`$answer = '${setup.answer}';\n$var = '${setup.varName}';\n$lat = '${setup.lat}';\n$lng = '${setup.lng}';\n$api_key = '${API_KEY}';\n\nreplace('%api_key%', $api_key);\nreplace('%lat%', $lat);\nreplace('%lng%', $lng);\nreplace('%answer%', $answer);\nreplace('%var%', $var);`,
+		);
+	}
 
-  if (setup.type === "shape") {
-    return buildPhpBlock(
-      setup.intID,
-      `$img = '${setup.img}';\n$var = '${setup.varName}';\n\nreplace('%img%', $img);\nreplace('%var%', $var);`
-    );
-  }
+	if (setup.type === "shape") {
+		return buildPhpBlock(
+			setup.intID,
+			`$img = '${setup.img}';\n$var = '${setup.varName}';\n\nreplace('%img%', $img);\nreplace('%var%', $var);`,
+		);
+	}
 
-  throw new Error(`Unsupported setup type: ${setup.type}`);
+	throw new Error(`Unsupported setup type: ${setup.type}`);
 }
 
 /**
@@ -481,7 +515,7 @@ function buildSetupPhp(setup) {
  * @returns {string} Script tag content as a string.
  */
 function buildPopupJs(bodySuffix) {
-  return `<script>
+	return `<script>
 document.addEventListener("DOMContentLoaded", function () {
   var btn = document.getElementById("submitO"); 
   if (!btn) btn = document.querySelector("button[type=\\"submit\\"]");
@@ -586,8 +620,8 @@ document.addEventListener("DOMContentLoaded", function () {
  * @returns {string} XML php block.
  */
 function buildFreqPopupPhp(trialNum, popupPhpIntID) {
-  const code = `$trialNum = ${trialNum};\n$points = value(id('V103', $trialNum));\n\n$html = '\n${buildPopupJs("this round!")}\n';\nhtml($html);`;
-  return buildPhpBlock(popupPhpIntID, code);
+	const code = `$trialNum = ${trialNum};\n$points = value(id('V103', $trialNum));\n\n$html = '\n${buildPopupJs("this round!")}\n';\nhtml($html);`;
+	return buildPhpBlock(popupPhpIntID, code);
 }
 
 /**
@@ -598,8 +632,8 @@ function buildFreqPopupPhp(trialNum, popupPhpIntID) {
  * @returns {string} XML php block.
  */
 function buildNonfPopupPhp(trialNum, popupPhpIntID) {
-  const code = `$trialNum = ${trialNum};\nif ($trialNum > 0 && $trialNum % 4 === 0) {\n    $index = $trialNum / 4;\n    $points = value(id('V104', $index));\n    $html = '\n${indent(buildPopupJs("over the last 4 rounds!"), 2)}\n    ';\n    html($html);\n}`;
-  return buildPhpBlock(popupPhpIntID, code);
+	const code = `$trialNum = ${trialNum};\nif ($trialNum > 0 && $trialNum % 4 === 0) {\n    $index = $trialNum / 4;\n    $points = value(id('V104', $index));\n    $html = '\n${indent(buildPopupJs("over the last 4 rounds!"), 2)}\n    ';\n    html($html);\n}`;
+	return buildPhpBlock(popupPhpIntID, code);
 }
 
 /**
@@ -619,31 +653,33 @@ function buildNonfPopupPhp(trialNum, popupPhpIntID) {
  * @returns {string} Full XML page block.
  */
 function buildTrialPage(page, pageNumber, mode, trialNum) {
-  const lines = [];
-  lines.push(`<!-- Page ${pageNumber} -->`);
-  lines.push(`<page ident="${page.ident}" intID="${page.pageIntID}">`);
+	const lines = [];
+	lines.push(`<!-- Page ${pageNumber} -->`);
+	lines.push(`<page ident="${page.ident}" intID="${page.pageIntID}">`);
 
-  const setupPhp = buildSetupPhp(page.setup);
-  if (setupPhp) lines.push(setupPhp);
+	const setupPhp = buildSetupPhp(page.setup);
+	if (setupPhp) lines.push(setupPhp);
 
-  lines.push(`<question id="${page.question.id}" intID="${page.question.intID}" />`);
+	lines.push(
+		`<question id="${page.question.id}" intID="${page.question.intID}" />`,
+	);
 
-  if (page.mainText) {
-    lines.push(buildTextBlock(page.mainText.id, page.mainText.intID));
-  }
+	if (page.mainText) {
+		lines.push(buildTextBlock(page.mainText.id, page.mainText.intID));
+	}
 
-  if (page.fbTextIntID !== null) {
-    lines.push(buildTextBlock("FB01", page.fbTextIntID));
-  }
+	if (page.fbTextIntID !== null) {
+		lines.push(buildTextBlock("FB01", page.fbTextIntID));
+	}
 
-  if (mode === "freq") {
-    lines.push(buildFreqPopupPhp(trialNum, page.popupPhpIntID));
-  } else {
-    lines.push(buildNonfPopupPhp(trialNum, page.popupPhpIntID));
-  }
+	if (mode === "freq") {
+		lines.push(buildFreqPopupPhp(trialNum, page.popupPhpIntID));
+	} else {
+		lines.push(buildNonfPopupPhp(trialNum, page.popupPhpIntID));
+	}
 
-  lines.push(`</page>`);
-  return lines.join("\n");
+	lines.push(`</page>`);
+	return lines.join("\n");
 }
 
 /**
@@ -651,27 +687,33 @@ function buildTrialPage(page, pageNumber, mode, trialNum) {
  * @returns {string} Full XML document.
  */
 function buildQuestionnaireXml() {
-  const pages = [];
+	const pages = [];
 
-  pages.push(`<!-- Page 1 -->\n<page ident="intro" intID="4">\n<html intID="42"><![CDATA[\n${introHtml}\n]]></html>\n</page>`);
+	pages.push(
+		`<!-- Page 1 -->\n<page ident="intro" intID="4">\n<html intID="42"><![CDATA[\n${introHtml}\n]]></html>\n</page>`,
+	);
 
-  pages.push(
-    `<!-- Page 2 -->\n<page ident="rand" intID="1">\n<info>this page is not shown to the participants</info>\n<question id="V102" intID="2" />\n${buildPhpBlock(3, randPhp)}\n</page>`
-  );
+	pages.push(
+		`<!-- Page 2 -->\n<page ident="rand" intID="1">\n<info>this page is not shown to the participants</info>\n<question id="V102" intID="2" />\n${buildPhpBlock(3, randPhp)}\n</page>`,
+	);
 
-  freqPages.forEach((page, idx) => {
-    pages.push(buildTrialPage(page, idx + 3, "freq", idx + 1));
-  });
+	freqPages.forEach((page, idx) => {
+		pages.push(buildTrialPage(page, idx + 3, "freq", idx + 1));
+	});
 
-  pages.push(`<!-- Page 19 -->\n<page ident="mid1" intID="7">\n<question id="Q101" intID="13" />\n</page>`);
+	pages.push(
+		`<!-- Page 19 -->\n<page ident="mid1" intID="7">\n<question id="Q101" intID="13" />\n</page>`,
+	);
 
-  nonfPages.forEach((page, idx) => {
-    pages.push(buildTrialPage(page, idx + 20, "nonf", idx + 1));
-  });
+	nonfPages.forEach((page, idx) => {
+		pages.push(buildTrialPage(page, idx + 20, "nonf", idx + 1));
+	});
 
-  pages.push(`<!-- Page 36 -->\n<page ident="mid2" intID="10">\n<question id="Q102" intID="31" />\n</page>`);
+	pages.push(
+		`<!-- Page 36 -->\n<page ident="mid2" intID="10">\n<question id="Q102" intID="31" />\n</page>`,
+	);
 
-  return `<?xml version="1.0"?>\n<questionnaire>\n\n${pages.join("\n\n\n")}\n\n\n</questionnaire>\n`;
+	return `<?xml version="1.0"?>\n<questionnaire>\n\n${pages.join("\n\n\n")}\n\n\n</questionnaire>\n`;
 }
 
 /**
@@ -680,10 +722,10 @@ function buildQuestionnaireXml() {
  * @returns {string} The path that was written.
  */
 function writeOutput(overwrite) {
-  const xml = buildQuestionnaireXml();
-  const outputPath = overwrite ? OVERWRITE_OUTPUT_PATH : OUTPUT_PATH;
-  fs.writeFileSync(outputPath, xml, "utf8");
-  return outputPath;
+	const xml = buildQuestionnaireXml();
+	const outputPath = overwrite ? OVERWRITE_OUTPUT_PATH : OUTPUT_PATH;
+	fs.writeFileSync(outputPath, xml, "utf8");
+	return outputPath;
 }
 
 const overwrite = process.argv.includes("--overwrite");
@@ -691,5 +733,5 @@ const writtenPath = writeOutput(overwrite);
 
 console.log(`Generated questionnaire XML at: ${writtenPath}`);
 if (!overwrite) {
-  console.log("Use --overwrite to replace Questionare.xml directly.");
+	console.log("Use --overwrite to replace Questionare.xml directly.");
 }

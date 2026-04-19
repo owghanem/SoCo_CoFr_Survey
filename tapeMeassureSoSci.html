@@ -1,14 +1,16 @@
 <style>
 	/* --- STYLES --- */
 	#game-wrapper {
-		max-width: 100%; /* Changed to fit screen width */
+		max-width: 100%;
+		/* Changed to fit screen width */
 		margin: 20px 0;
 		padding: 20px;
 		background: #f9f9f9;
 		border: 1px solid #ddd;
 		border-radius: 8px;
 		font-family: Arial, sans-serif;
-		overflow: visible; /* Allow handle to go outside visually if needed */
+		overflow: visible;
+		/* Allow handle to go outside visually if needed */
 	}
 
 	.tape-container {
@@ -18,9 +20,12 @@
 		border: 1px solid #bbb;
 		border-radius: 4px;
 		margin-top: 20px;
-		user-select: none; /* Crucial for dragging */
-		touch-action: none; /* Crucial for mobile */
-		overflow: hidden; /* 1. Ensure visuals stay inside the box */
+		user-select: none;
+		/* Crucial for dragging */
+		touch-action: none;
+		/* Crucial for mobile */
+		overflow: hidden;
+		/* 1. Ensure visuals stay inside the box */
 	}
 
 	/* The plastic housing */
@@ -45,24 +50,27 @@
 		background-color: #f1c40f;
 		border: 1px solid #cfaa08;
 		z-index: 5;
-		
+
 		/* --- NEW REALISTIC RULER PATTERN --- */
 		/* Layer 1: CM marks (Longest, Black) */
 		/* Layer 2: 0.5 CM marks (Medium, Dark Grey) */
 		/* Layer 3: MM marks (Shortest, Light Grey) */
-		background-image: 
+		background-image:
 			linear-gradient(90deg, #000 2px, transparent 2px),
 			linear-gradient(90deg, #333 1px, transparent 1px),
 			linear-gradient(90deg, #666 1px, transparent 1px);
-        
-        /* Sizing matches CSS physical units */
-        background-size: 
-            1cm 100%,      /* 1cm repeat */
-            0.5cm 60%,     /* 0.5cm repeat */
-            0.1cm 30%;     /* 1mm repeat */
-            
-        background-repeat: repeat-x;
-        background-position: bottom left;
+
+		/* Sizing matches CSS physical units */
+		background-size:
+			1cm 100%,
+			/* 1cm repeat */
+			0.5cm 60%,
+			/* 0.5cm repeat */
+			0.1cm 30%;
+		/* 1mm repeat */
+
+		background-repeat: repeat-x;
+		background-position: bottom left;
 	}
 
 	/* The drag handle */
@@ -80,14 +88,75 @@
 
 	/* Hide the Internal Variable input field provided by SoSci */
 	/* Replace 'IV01_01' below if your variable ID is different */
-	#%var% {
+	#%var%,
+	#%goalVar% {
 		display: none;
+	}
+
+	/* --- MOBILE RESPONSIVE (VERTICAL VIEW) --- */
+	@media (max-width: 600px) {
+		.tape-container {
+			width: 80px;
+			height: 80vh;
+			/* Increased to take more space vertically */
+			min-height: 500px;
+			margin: 20px auto;
+		}
+
+		.tape-housing {
+			left: 10px;
+			bottom: 0;
+			top: auto;
+			width: 60px;
+			height: 60px;
+			border-radius: 4px 4px 0 0;
+			/* Curve the top instead */
+		}
+
+		.tape-strip {
+			left: 25px;
+			bottom: 60px;
+			/* Start right above the housing */
+			top: auto;
+			width: 30px;
+			height: 0px;
+			/* Height will be controlled by JS now */
+
+			/* Rotate the ruler marks to point upwards from the bottom */
+			background-image:
+				linear-gradient(0deg, #000 2px, transparent 2px),
+				linear-gradient(0deg, #333 1px, transparent 1px),
+				linear-gradient(0deg, #666 1px, transparent 1px);
+
+			/* Adjust background size to repeat safely upwards */
+			background-size:
+				100% 1cm,
+				/* 1cm repeat */
+				60% 0.5cm,
+				/* 0.5cm repeat */
+				30% 0.1cm;
+			/* 1mm repeat */
+
+			background-repeat: repeat-y;
+			background-position: bottom left;
+			/* Crucial for keeping 0 at the housing level */
+		}
+
+		.tape-handle {
+			left: 15px;
+			bottom: 60px;
+			top: auto;
+			width: 50px;
+			height: 20px;
+			cursor: row-resize;
+			/* Vertical resize cursor */
+		}
 	}
 </style>
 
 <div id="game-wrapper">
 	<div style="font-size: 18px; margin-bottom: 15px">
-		Please pull the tape measure to exactly: <b>%goal% cm</b>
+		Please pull the tape measure to exactly: <b id="goal-display">%goalMm% mm</b>
 	</div>
 
 	<div class="tape-container" id="tape-interaction-area">
@@ -100,16 +169,41 @@
 <script>
 	(function () {
 		// Wait for the page to load, then disable the Next button
-		window.addEventListener("load", function() {
+		window.addEventListener("load", function () {
 			let nextButton = document.getElementById("submit0");
 			if (nextButton) {
-				nextButton.disabled = true; 
+				nextButton.disabled = true;
 			}
 		});
 
 		// --- CONFIGURATION ---
 		// CHANGE THIS to your actual Internal Variable ID!
 		const internalVarID = "%var%";
+		// another internal variable ID to save dynamically generated goals:
+		const goalVarID = "%goalVar%";
+		const goalInput = document.getElementById(goalVarID);
+
+		if (goalInput) {
+			// Save the original goal from SoSci into the variable for fallback use
+			goalInput.value = "%goalMm%";
+		}
+
+		// --- NEW FALLBACKS IN CASE PHP/SOSCI FAILS ---
+		const goalDisplay = document.getElementById("goal-display");
+		// Break the string up so the PHP replacement engine doesn't trip on this
+		const placeholderGoal = "%g" + "oalMm%";
+
+		if (goalDisplay && goalDisplay.innerText.includes(placeholderGoal)) {
+			// If it wasn't replaced, pick a random plausible goal between 5 and 120 mm (fits on mobile and PC screens safely)
+			const randomGoal = Math.floor(Math.random() * (120 - 5 + 1)) + 5;
+			goalDisplay.innerText = randomGoal + " mm";
+
+			// Try to automatically save the new random goal back into SoSci so you have it in your data
+			if (goalInput) {
+				goalInput.value = randomGoal;
+			}
+		}
+
 
 		// --- NEW DYNAMIC CALIBRATION ---
 		// We create a temporary 1cm element to see how many pixels the browser uses for it.
@@ -125,9 +219,9 @@
 		}
 
 		console.log("Calculated px/cm:", getPixelsPerCm());
-		
+
 		const pixelsPerCm = getPixelsPerCm();
-		const maxCm = parseFloat("%maxCm%") || 50; // Default to 50cm if not set
+		const maxMm = parseFloat("%maxMm%") || 500; // Default to 500mm if not set
 		// ---------------------
 
 		const handle = document.getElementById("tape-handle");
@@ -139,36 +233,67 @@
 
 		let isDragging = false;
 		let startX = 0;
-		let startLeft = 0;
+		let startY = 0;
+		let startVal = 0; // Agnostic variable combining startLeft / startTop
 		const zeroOffset = 60; // Housing width
 
-		function update(pageX) {
-			if (!isDragging) return;
-			const delta = pageX - startX;
-			let newPixels = startLeft + delta;
+		// --- NEW: Detect screen orientation mode ---
+		let isVertical = window.matchMedia("(max-width: 600px)").matches;
+		let wasVertical = isVertical;
 
-			// 2. Calculate dynamic limit based on container width
-			// Container width - Housing (60px) - Handle width (20px)
-			const containerLimit = container.offsetWidth - 60 - 20;
+		// Listen for window resizes so it adapts live
+		window.addEventListener('resize', () => {
+			isVertical = window.matchMedia("(max-width: 600px)").matches;
+
+			// Mobile browsers trigger 'resize' on scroll due to the address bar changing size.
+			// Only reset style attributes if we actually changed from horizontal to vertical or vice versa.
+			if (isVertical !== wasVertical) {
+				handle.style.left = "";
+				handle.style.top = "";
+				handle.style.bottom = "";
+				tape.style.width = "";
+				tape.style.height = "";
+				wasVertical = isVertical;
+			}
+		});
+
+		function update(pageX, pageY) {
+			if (!isDragging) return;
+
+			// Check which axis we are using
+			// When vertical, moving UP means pageY decreases, so startY - pageY is a positive growth
+			const delta = isVertical ? (startY - pageY) : (pageX - startX);
+			let newPixels = startVal + delta;
+
+			// Calculate dynamic limit based on active axis
+			const containerLimit = isVertical
+				? container.offsetHeight - 60 - 20
+				: container.offsetWidth - 60 - 20;
 
 			// Limits
-            if (newPixels < 0) newPixels = 0;
-            
-            // Stop at 50cm OR the visual edge, whichever comes first
-            const actualMax = Math.min(maxCm * pixelsPerCm, containerLimit);
-            
-            if (newPixels > actualMax) newPixels = actualMax;
+			if (newPixels < 0) newPixels = 0;
 
-			// Update Visuals
-			handle.style.left = zeroOffset + newPixels + "px";
-			tape.style.width = newPixels + "px";
+			// Stop at max mm OR the visual edge, whichever comes first
+			const actualMax = Math.min((maxMm / 10) * pixelsPerCm, containerLimit);
 
-			// Save Data to SoSci Variable
+			if (newPixels > actualMax) newPixels = actualMax;
+
+			// Apply the CSS dynamically based on axis
+			if (isVertical) {
+				handle.style.bottom = zeroOffset + newPixels + "px";
+				tape.style.height = newPixels + "px";
+			} else {
+				handle.style.left = zeroOffset + newPixels + "px";
+				tape.style.width = newPixels + "px";
+			}
+
+			// Save data to SoSci variable as millimeters.
 			if (soSciInput) {
-				// We still divide by our dynamic pixelsPerCm to get accurate CM value
-				let cm = (newPixels / pixelsPerCm).toFixed(2);
-				console.log(cm);
-				soSciInput.value = cm;
+				let mm = Math.round((newPixels / pixelsPerCm) * 10);
+				soSciInput.value = mm;
+
+				// LOGGING FOR VERIFICATION
+				console.log(`Current raw pixels: ${newPixels.toFixed(2)}, Calculated mm: ${mm}mm`);
 
 				document.getElementById("submit0").disabled = false;
 			}
@@ -178,12 +303,15 @@
 		handle.addEventListener("mousedown", function (e) {
 			isDragging = true;
 			startX = e.pageX;
-			startLeft = (parseInt(handle.style.left) || zeroOffset) - zeroOffset;
+			startY = e.pageY;
+			startVal = isVertical
+				? (parseInt(handle.style.bottom) || zeroOffset) - zeroOffset
+				: (parseInt(handle.style.left) || zeroOffset) - zeroOffset;
 			e.preventDefault();
 		});
 
 		document.addEventListener("mouseup", () => (isDragging = false));
-		document.addEventListener("mousemove", (e) => update(e.pageX));
+		document.addEventListener("mousemove", (e) => update(e.pageX, e.pageY));
 
 		// Touch Events (Mobile support)
 		handle.addEventListener(
@@ -191,18 +319,19 @@
 			function (e) {
 				isDragging = true;
 				startX = e.touches[0].pageX;
-				startLeft = (parseInt(handle.style.left) || zeroOffset) - zeroOffset;
+				startY = e.touches[0].pageY;
+				startVal = isVertical
+					? (parseInt(handle.style.bottom) || zeroOffset) - zeroOffset
+					: (parseInt(handle.style.left) || zeroOffset) - zeroOffset;
 				e.preventDefault();
 			},
 			{ passive: false },
 		);
 
 		document.addEventListener("touchend", () => (isDragging = false));
-		document.addEventListener("touchmove", (e) => update(e.touches[0].pageX), {
+		document.addEventListener("touchmove", (e) => update(e.touches[0].pageX, e.touches[0].pageY), {
 			passive: false,
 		});
-
-
 
 	})();
 </script>
