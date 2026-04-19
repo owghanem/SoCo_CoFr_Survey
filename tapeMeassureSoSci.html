@@ -2,9 +2,6 @@
 	/* --- STYLES --- */
 	#game-wrapper {
 		max-width: 100%;
-		/* Changed to fit screen width */
-		margin: 20px 0;
-		padding: 20px;
 		background: #f9f9f9;
 		border: 1px solid #ddd;
 		border-radius: 8px;
@@ -16,6 +13,7 @@
 	.tape-container {
 		position: relative;
 		height: 80px;
+		margin: 1rem;
 		background: #eee;
 		border: 1px solid #bbb;
 		border-radius: 4px;
@@ -32,11 +30,11 @@
 	.tape-housing {
 		position: absolute;
 		left: 0;
-		top: 10px;
+		top: 17px;
 		width: 60px;
-		height: 60px;
+		height: 47px;
 		background: #e67e22;
-		border-radius: 0 4px 4px 0;
+		border-radius: 4px;
 		z-index: 10;
 	}
 
@@ -51,35 +49,36 @@
 		border: 1px solid #cfaa08;
 		z-index: 5;
 
-		/* --- NEW REALISTIC RULER PATTERN --- */
+		/* --- NEW REALISTIC RULER PATTERN ---
 		/* Layer 1: CM marks (Longest, Black) */
 		/* Layer 2: 0.5 CM marks (Medium, Dark Grey) */
 		/* Layer 3: MM marks (Shortest, Light Grey) */
-		background-image:
+		/* background-image:
 			linear-gradient(90deg, #000 2px, transparent 2px),
 			linear-gradient(90deg, #333 1px, transparent 1px),
-			linear-gradient(90deg, #666 1px, transparent 1px);
+			linear-gradient(90deg, #666 1px, transparent 1px); */
 
 		/* Sizing matches CSS physical units */
-		background-size:
-			1cm 100%,
-			/* 1cm repeat */
-			0.5cm 60%,
-			/* 0.5cm repeat */
-			0.1cm 30%;
+		/* background-size: */
+		/* 1cm 100%, */
+		/* 1cm repeat */
+		/* 0.5cm 60%, */
+		/* 0.5cm repeat */
+		/* 0.1cm 30%; */
 		/* 1mm repeat */
 
-		background-repeat: repeat-x;
-		background-position: bottom left;
+		/* background-repeat: repeat-x; */
+		/* background-position: bottom left; */
+
 	}
 
 	/* The drag handle */
 	.tape-handle {
 		position: absolute;
 		left: 60px;
-		top: 15px;
+		top: 17px;
 		width: 20px;
-		height: 50px;
+		height: 47px;
 		background: #444;
 		border-radius: 4px;
 		cursor: col-resize;
@@ -88,8 +87,8 @@
 
 	/* Hide the Internal Variable input field provided by SoSci */
 	/* Replace 'IV01_01' below if your variable ID is different */
-	#%var%,
-	#%goalVar% {
+	#%userVar%,
+	#%targetVar% {
 		display: none;
 	}
 
@@ -97,19 +96,18 @@
 	@media (max-width: 600px) {
 		.tape-container {
 			width: 80px;
-			height: 80vh;
 			/* Increased to take more space vertically */
 			min-height: 500px;
-			margin: 20px auto;
+			margin: 0.5rem auto 1rem;
 		}
 
 		.tape-housing {
-			left: 10px;
+			left: 17px;
 			bottom: 0;
 			top: auto;
-			width: 60px;
+			width: 47px;
 			height: 60px;
-			border-radius: 4px 4px 0 0;
+			border-radius: 4px;
 			/* Curve the top instead */
 		}
 
@@ -123,30 +121,30 @@
 			/* Height will be controlled by JS now */
 
 			/* Rotate the ruler marks to point upwards from the bottom */
-			background-image:
-				linear-gradient(0deg, #000 2px, transparent 2px),
-				linear-gradient(0deg, #333 1px, transparent 1px),
-				linear-gradient(0deg, #666 1px, transparent 1px);
+			/* background-image: */
+			/* linear-gradient(0deg, #000 2px, transparent 2px), */
+			/* linear-gradient(0deg, #333 1px, transparent 1px), */
+			/* linear-gradient(0deg, #666 1px, transparent 1px); */
 
 			/* Adjust background size to repeat safely upwards */
-			background-size:
-				100% 1cm,
-				/* 1cm repeat */
-				60% 0.5cm,
-				/* 0.5cm repeat */
-				30% 0.1cm;
+			/* background-size: */
+			/* 100% 1cm, */
+			/* 1cm repeat */
+			/* 60% 0.5cm, */
+			/* 0.5cm repeat */
+			/* 30% 0.1cm; */
 			/* 1mm repeat */
 
-			background-repeat: repeat-y;
-			background-position: bottom left;
+			/* background-repeat: repeat-y; */
+			/* background-position: bottom left; */
 			/* Crucial for keeping 0 at the housing level */
 		}
 
 		.tape-handle {
-			left: 15px;
+			left: 17px;
 			bottom: 60px;
 			top: auto;
-			width: 50px;
+			width: 47px;
 			height: 20px;
 			cursor: row-resize;
 			/* Vertical resize cursor */
@@ -155,14 +153,14 @@
 </style>
 
 <div id="game-wrapper">
-	<div style="font-size: 18px; margin-bottom: 15px">
-		Please pull the tape measure to exactly: <b id="goal-display">%goalMm% mm</b>
-	</div>
-
 	<div class="tape-container" id="tape-interaction-area">
 		<div class="tape-housing"></div>
 		<div class="tape-strip" id="tape-strip"></div>
 		<div class="tape-handle" id="tape-handle"></div>
+	</div>
+
+	<div style="font-size: 18px; margin: 1rem;">
+		Please pull the tape measure to <b>exactly</b>: <b id="goal-display">...</b>
 	</div>
 </div>
 
@@ -182,30 +180,21 @@
 
 		// --- CONFIGURATION ---
 		// CHANGE THIS to your actual Internal Variable ID!
-		const internalVarID = "%var%";
+		const internalVarID = "%userVar%";
 		// another internal variable ID to save dynamically generated goals:
-		const goalVarID = "%goalVar%";
+		const goalVarID = "%targetVar%";
 		const goalInput = document.getElementById(goalVarID);
 
-		if (goalInput) {
-			// Save the original goal from SoSci into the variable for fallback use
-			goalInput.value = "%goalMm%";
-		}
-
-		// --- NEW FALLBACKS IN CASE PHP/SOSCI FAILS ---
+		// Use fixed goal if configured via %goalMm%, otherwise generate one per trial.
 		const goalDisplay = document.getElementById("goal-display");
-		// Break the string up so the PHP replacement engine doesn't trip on this
-		const placeholderGoal = "%g" + "oalMm%";
-
-		if (goalDisplay && goalDisplay.innerText.includes(placeholderGoal)) {
-			// If it wasn't replaced, pick a random plausible goal between 5 and 120 mm (fits on mobile and PC screens safely)
-			const randomGoal = Math.floor(Math.random() * (120 - 5 + 1)) + 5;
-			goalDisplay.innerText = randomGoal + " mm";
-
-			// Try to automatically save the new random goal back into SoSci so you have it in your data
-			if (goalInput) {
-				goalInput.value = randomGoal;
-			}
+		const configuredGoal = parseFloat("%goalMm%");
+		const randomGoal = Math.floor(Math.random() * (120 - 5 + 1)) + 5;
+		const targetGoal = Number.isFinite(configuredGoal) ? configuredGoal : randomGoal;
+		if (goalDisplay) {
+			goalDisplay.innerText = targetGoal + " mm";
+		}
+		if (goalInput) {
+			goalInput.value = targetGoal;
 		}
 
 

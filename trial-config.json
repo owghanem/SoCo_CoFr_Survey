@@ -1,0 +1,64 @@
+{
+	"tape": {
+		"T1": {
+			"userVarName": "G103_01",
+			"targetVarName": "G103_02"
+		},
+		"T2": {
+			"userVarName": "G103_03",
+			"targetVarName": "G103_04"
+		},
+		"T3": {
+			"userVarName": "G103_05",
+			"targetVarName": "G103_06"
+		},
+		"T4": {
+			"userVarName": "G103_07",
+			"targetVarName": "G103_08"
+		}
+	},
+	"geo": {
+		"G1": {
+			"varName": "G101_01",
+			"answer": "United States of America",
+			"lat": "32.0117548",
+			"lng": "-93.9271803"
+		},
+		"G2": {
+			"varName": "G101_02",
+			"answer": "Greece",
+			"lat": "37.6047259",
+			"lng": "23.3298282"
+		},
+		"G3": {
+			"varName": "G101_03",
+			"answer": "Canada",
+			"lat": "53.1995399",
+			"lng": "-105.3321598"
+		},
+		"G4": {
+			"varName": "G101_04",
+			"answer": "Uruguay",
+			"lat": "-30.4625891",
+			"lng": "-56.9016809"
+		}
+	},
+	"shape": {
+		"S1": {
+			"varName": "G102_01",
+			"img": "prezel.png"
+		},
+		"S2": {
+			"varName": "G102_02",
+			"img": "banana_1.png"
+		},
+		"S3": {
+			"varName": "G102_03",
+			"img": "croissant.png"
+		},
+		"S4": {
+			"varName": "G102_04",
+			"img": "apple.png"
+		}
+	}
+}

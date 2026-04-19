@@ -8,6 +8,11 @@ const PATHS = {
 	overwrite: path.join(__dirname, "Questionare.xml"),
 };
 
+const PHP_PATHS = {
+	default: path.join(__dirname, "Questionare.functions.generated.php"),
+	overwrite: path.join(__dirname, "Questionare.functions.php"),
+};
+
 function readEnvValue(key) {
 	const envPath = path.join(__dirname, ".env");
 	if (!fs.existsSync(envPath)) return undefined;
@@ -32,6 +37,9 @@ function readEnvValue(key) {
 
 const GOOGLE_API_KEY =
 	readEnvValue("API_KEY") || readEnvValue("GOOGLE_API_KEY") || "";
+
+const TRIAL_CONFIG_PATH = path.join(__dirname, "trial-config.json");
+const TRIAL_CONFIG = JSON.parse(fs.readFileSync(TRIAL_CONFIG_PATH, "utf8"));
 
 const INTRO_HTML = `<div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto;">
 
@@ -235,14 +243,14 @@ document.addEventListener("DOMContentLoaded", function () {
 			"<div style=\\"position:absolute;top:12px;right:12px;width:34px;height:34px;\\">" +
 				"<svg width=\\"34\\" height=\\"34\\" viewBox=\\"0 0 34 34\\">" +
 					"<circle cx=\\"17\\" cy=\\"17\\" r=\\"14\\" stroke=\\"#E0E0E0\\" stroke-width=\\"4\\" fill=\\"none\\"></circle>" +
-					"<circle id=\\"popup-timer-circle\\" cx=\\"17\\" cy=\\"17\\" r=\\"14\\" stroke=\\"#0055A4\\" stroke-width=\\"4\\" fill=\\"none\\" stroke-linecap=\\"round\\" transform=\\"rotate(-90 17 17)\\"></circle>" +
+					"<circle id=\\"popup-timer-circle\\" cx=\\"17\\" cy=\\"17\\" r=\\"14\\" stroke=\\"#50aadc\\" stroke-width=\\"4\\" fill=\\"none\\" stroke-linecap=\\"round\\" transform=\\"rotate(-90 17 17)\\"></circle>" +
 					"<text id=\\"popup-timer-label\\" x=\\"17\\" y=\\"21\\" text-anchor=\\"middle\\" font-size=\\"9\\" fill=\\"#333\\" font-family=\\"sans-serif\\">10</text>" +
 				"</svg>" +
 			"</div>" +
 			"<div style=\\"font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#4b5563;font-weight:700;\\">Round Result</div>" +
-			"<div style=\\"margin:10px auto 14px auto;display:inline-block;padding:8px 16px;border-radius:999px;background:#0055A4;color:#ffffff;font-size:30px;font-weight:800;line-height:1;\\">__POINTS__ pts</div>" +
+			"<div style=\\"margin:10px auto 14px auto;display:inline-block;padding:8px 16px;border-radius:999px;background:#50aadc;color:#ffffff;font-size:30px;font-weight:800;line-height:1;\\">__POINTS__ pts</div>" +
 			"<p style=\\"margin:0;font-size:20px;color:#0f172a;\\">You earned __POINTS__ points <strong>__BODY_SUFFIX__</strong></p>" +
-			"<button id=\\"popup-continue\\" style=\\"margin-top:18px;padding:11px 30px;background:#0055A4;color:white;border:none;border-radius:8px;cursor:pointer;font-size:16px;font-weight:700;\\">Continue</button>";
+			"<button id=\\"popup-continue\\" style=\\"margin-top:18px;padding:11px 30px;background:#50aadc;color:white;border:none;border-radius:8px;cursor:pointer;font-size:16px;font-weight:700;\\">Continue</button>";
 
 		overlay.appendChild(box);
 		document.body.appendChild(overlay);
@@ -296,7 +304,7 @@ function phpSingleQuotedString(value) {
 const RANDOMISATION_PHP = `
 $condition = value('V102');
 
-if (!isset($freq_pages) || !isset($nonf_pages) || !isset($points_freq) || !isset($points_nonfreq) || !isset($popup_template)) {
+if (!isset($freq_pages) || !isset($nonf_pages) || !isset($points_freq) || !isset($points_nonfreq)) {
   $geo_pages = array('G1', 'G2', 'G3', 'G4');
   $tape_pages = array('T1', 'T2', 'T3', 'T4');
   $split_pages = array('S1', 'S2', 'S3', 'S4');
@@ -333,13 +341,10 @@ if (!isset($freq_pages) || !isset($nonf_pages) || !isset($points_freq) || !isset
   shuffle($points_freq);
   shuffle($points_nonfreq);
 
-	$popup_template = ${phpSingleQuotedString(POPUP_TEMPLATE_JS)};
-
   registerVariable($freq_pages);
   registerVariable($nonf_pages);
   registerVariable($points_freq);
   registerVariable($points_nonfreq);
-	registerVariable($popup_template);
 
   for ($i = 0; $i < 16; $i++) {
     put(id('V103', $i + 1), $points_freq[$i]);
@@ -382,6 +387,59 @@ if ($condition == 1) {
 }
 `.trim();
 
+function buildPhpFunctionsFile() {
+	return `
+function fopra_popup_template() {
+	return ${phpSingleQuotedString(POPUP_TEMPLATE_JS)};
+}
+
+function fopra_popup_context($pageIdent, $freqPages, $nonfPages) {
+	$ctx = array(
+		'showPopup' => false,
+		'points' => '0',
+		'suffix' => ''
+	);
+
+	$freqIndex = array_search($pageIdent, $freqPages, true);
+	if ($freqIndex !== false) {
+		$trialNum = $freqIndex + 1;
+		$ctx['showPopup'] = true;
+		$ctx['points'] = (string)value(id('V103', $trialNum));
+		$ctx['suffix'] = 'this round!';
+		return $ctx;
+	}
+
+	$nonfIndex = array_search($pageIdent, $nonfPages, true);
+	if ($nonfIndex !== false) {
+		$trialNum = $nonfIndex + 1;
+		$ctx['suffix'] = 'over the last 4 rounds!';
+		if ($trialNum > 0 && $trialNum % 4 === 0) {
+			$index = $trialNum / 4;
+			$ctx['showPopup'] = true;
+			$ctx['points'] = (string)value(id('V104', $index));
+		}
+	}
+
+	return $ctx;
+}
+
+function fopra_popup_html($needAnswer, $showPopup, $points, $suffix) {
+	$replacements = array(
+		'__NEED_ANSWER__' => $needAnswer ? 'true' : 'false',
+		'__SHOW_POPUP__' => $showPopup ? 'true' : 'false',
+		'__POINTS__' => (string)$points,
+		'__BODY_SUFFIX__' => (string)$suffix,
+	);
+
+	return str_replace(
+		array_keys($replacements),
+		array_values($replacements),
+		fopra_popup_template()
+	);
+}
+`;
+}
+
 const TRIAL_PAGES = [
 	{
 		ident: "T1",
@@ -389,14 +447,12 @@ const TRIAL_PAGES = [
 		pageIntID: 22,
 		question: { id: "G103", intID: 24 },
 		mainText: { id: "MT01", intID: 23 },
-		fbTextIntID: 19,
 		popupIntID: 130,
 		setup: {
 			type: "measure",
 			intID: 25,
-			varName: "G103_01",
+			...TRIAL_CONFIG.tape.T1,
 			maxMm: 500,
-			goalMm: 145,
 		},
 	},
 	{
@@ -405,14 +461,12 @@ const TRIAL_PAGES = [
 		pageIntID: 70,
 		question: { id: "G103", intID: 72 },
 		mainText: { id: "MT01", intID: 73 },
-		fbTextIntID: 20,
 		popupIntID: 131,
 		setup: {
 			type: "measure",
 			intID: 71,
-			varName: "G103_02",
+			...TRIAL_CONFIG.tape.T2,
 			maxMm: 500,
-			goalMm: 278,
 		},
 	},
 	{
@@ -421,14 +475,12 @@ const TRIAL_PAGES = [
 		pageIntID: 74,
 		question: { id: "G103", intID: 76 },
 		mainText: { id: "MT01", intID: 77 },
-		fbTextIntID: 114,
 		popupIntID: 146,
 		setup: {
 			type: "measure",
 			intID: 75,
-			varName: "G103_03",
+			...TRIAL_CONFIG.tape.T3,
 			maxMm: 500,
-			goalMm: 322,
 		},
 	},
 	{
@@ -437,14 +489,12 @@ const TRIAL_PAGES = [
 		pageIntID: 78,
 		question: { id: "G103", intID: 80 },
 		mainText: { id: "MT01", intID: 81 },
-		fbTextIntID: 115,
 		popupIntID: 147,
 		setup: {
 			type: "measure",
 			intID: 79,
-			varName: "G103_04",
+			...TRIAL_CONFIG.tape.T4,
 			maxMm: 500,
-			goalMm: 467,
 		},
 	},
 	{
@@ -453,15 +503,11 @@ const TRIAL_PAGES = [
 		pageIntID: 5,
 		question: { id: "G101", intID: 11 },
 		mainText: { id: "GG01", intID: 18 },
-		fbTextIntID: 21,
 		popupIntID: 132,
 		setup: {
 			type: "geo",
 			intID: 26,
-			varName: "G101_01",
-			answer: "United States of America",
-			lat: "32.0117548",
-			lng: "-93.9271803",
+			...TRIAL_CONFIG.geo.G1,
 		},
 	},
 	{
@@ -470,15 +516,11 @@ const TRIAL_PAGES = [
 		pageIntID: 82,
 		question: { id: "G101", intID: 84 },
 		mainText: { id: "GG01", intID: 85 },
-		fbTextIntID: 63,
 		popupIntID: 133,
 		setup: {
 			type: "geo",
 			intID: 83,
-			varName: "G101_02",
-			answer: "Greece",
-			lat: "37.6047259",
-			lng: "23.3298282",
+			...TRIAL_CONFIG.geo.G2,
 		},
 	},
 	{
@@ -487,15 +529,11 @@ const TRIAL_PAGES = [
 		pageIntID: 86,
 		question: { id: "G101", intID: 88 },
 		mainText: { id: "GG01", intID: 89 },
-		fbTextIntID: 116,
 		popupIntID: 148,
 		setup: {
 			type: "geo",
 			intID: 87,
-			varName: "G101_03",
-			answer: "Canada",
-			lat: "53.1995399",
-			lng: "-105.3321598",
+			...TRIAL_CONFIG.geo.G3,
 		},
 	},
 	{
@@ -504,15 +542,11 @@ const TRIAL_PAGES = [
 		pageIntID: 90,
 		question: { id: "G101", intID: 92 },
 		mainText: { id: "GG01", intID: 93 },
-		fbTextIntID: 117,
 		popupIntID: 149,
 		setup: {
 			type: "geo",
 			intID: 91,
-			varName: "G101_04",
-			answer: "Uruguay",
-			lat: "-30.4625891",
-			lng: "-56.9016809",
+			...TRIAL_CONFIG.geo.G4,
 		},
 	},
 	{
@@ -521,9 +555,8 @@ const TRIAL_PAGES = [
 		pageIntID: 27,
 		question: { id: "G102", intID: 28 },
 		mainText: { id: "SH01", intID: 29 },
-		fbTextIntID: 61,
 		popupIntID: 134,
-		setup: { type: "shape", intID: 30, varName: "G102_01", img: "prezel.png" },
+		setup: { type: "shape", intID: 30, ...TRIAL_CONFIG.shape.S1 },
 	},
 	{
 		ident: "S2",
@@ -531,13 +564,11 @@ const TRIAL_PAGES = [
 		pageIntID: 94,
 		question: { id: "G102", intID: 96 },
 		mainText: { id: "SH01", intID: 97 },
-		fbTextIntID: 62,
 		popupIntID: 135,
 		setup: {
 			type: "shape",
 			intID: 95,
-			varName: "G102_02",
-			img: "banana_1.png",
+			...TRIAL_CONFIG.shape.S2,
 		},
 	},
 	{
@@ -546,13 +577,11 @@ const TRIAL_PAGES = [
 		pageIntID: 98,
 		question: { id: "G102", intID: 100 },
 		mainText: { id: "SH01", intID: 101 },
-		fbTextIntID: 118,
 		popupIntID: 150,
 		setup: {
 			type: "shape",
 			intID: 99,
-			varName: "G102_03",
-			img: "croissant.png",
+			...TRIAL_CONFIG.shape.S3,
 		},
 	},
 	{
@@ -561,9 +590,8 @@ const TRIAL_PAGES = [
 		pageIntID: 102,
 		question: { id: "G102", intID: 104 },
 		mainText: { id: "SH01", intID: 105 },
-		fbTextIntID: 119,
 		popupIntID: 151,
-		setup: { type: "shape", intID: 103, varName: "G102_04", img: "apple.png" },
+		setup: { type: "shape", intID: 103, ...TRIAL_CONFIG.shape.S4 },
 	},
 	{
 		ident: "Q1",
@@ -571,7 +599,6 @@ const TRIAL_PAGES = [
 		pageIntID: 16,
 		question: { id: "Q101", intID: 17 },
 		mainText: null,
-		fbTextIntID: 63,
 		popupIntID: 136,
 		setup: null,
 	},
@@ -581,7 +608,6 @@ const TRIAL_PAGES = [
 		pageIntID: 6,
 		question: { id: "Q107", intID: 12 },
 		mainText: null,
-		fbTextIntID: 66,
 		popupIntID: 137,
 		setup: null,
 	},
@@ -591,7 +617,6 @@ const TRIAL_PAGES = [
 		pageIntID: 32,
 		question: { id: "Q103", intID: 43 },
 		mainText: null,
-		fbTextIntID: 68,
 		popupIntID: 138,
 		setup: null,
 	},
@@ -601,7 +626,6 @@ const TRIAL_PAGES = [
 		pageIntID: 8,
 		question: { id: "Q109", intID: 14 },
 		mainText: null,
-		fbTextIntID: 82,
 		popupIntID: 139,
 		setup: null,
 	},
@@ -611,7 +635,6 @@ const TRIAL_PAGES = [
 		pageIntID: 9,
 		question: { id: "Q105", intID: 15 },
 		mainText: null,
-		fbTextIntID: 83,
 		popupIntID: 140,
 		setup: null,
 	},
@@ -621,7 +644,6 @@ const TRIAL_PAGES = [
 		pageIntID: 38,
 		question: { id: "Q201", intID: 49 },
 		mainText: null,
-		fbTextIntID: 84,
 		popupIntID: 141,
 		setup: null,
 	},
@@ -631,7 +653,6 @@ const TRIAL_PAGES = [
 		pageIntID: 39,
 		question: { id: "Q207", intID: 50 },
 		mainText: null,
-		fbTextIntID: 85,
 		popupIntID: 142,
 		setup: null,
 	},
@@ -641,7 +662,6 @@ const TRIAL_PAGES = [
 		pageIntID: 40,
 		question: { id: "Q203", intID: 51 },
 		mainText: null,
-		fbTextIntID: 106,
 		popupIntID: 143,
 		setup: null,
 	},
@@ -651,7 +671,6 @@ const TRIAL_PAGES = [
 		pageIntID: 41,
 		question: { id: "Q209", intID: 52 },
 		mainText: null,
-		fbTextIntID: 107,
 		popupIntID: 144,
 		setup: null,
 	},
@@ -661,7 +680,6 @@ const TRIAL_PAGES = [
 		pageIntID: 53,
 		question: { id: "Q205", intID: 64 },
 		mainText: null,
-		fbTextIntID: 108,
 		popupIntID: 145,
 		setup: null,
 	},
@@ -671,7 +689,6 @@ const TRIAL_PAGES = [
 		pageIntID: 33,
 		question: { id: "Q106", intID: 44 },
 		mainText: null,
-		fbTextIntID: 120,
 		popupIntID: 152,
 		setup: null,
 	},
@@ -681,7 +698,6 @@ const TRIAL_PAGES = [
 		pageIntID: 34,
 		question: { id: "Q102", intID: 45 },
 		mainText: null,
-		fbTextIntID: 121,
 		popupIntID: 153,
 		setup: null,
 	},
@@ -691,7 +707,6 @@ const TRIAL_PAGES = [
 		pageIntID: 35,
 		question: { id: "Q108", intID: 46 },
 		mainText: null,
-		fbTextIntID: 122,
 		popupIntID: 154,
 		setup: null,
 	},
@@ -701,7 +716,6 @@ const TRIAL_PAGES = [
 		pageIntID: 36,
 		question: { id: "Q104", intID: 47 },
 		mainText: null,
-		fbTextIntID: 123,
 		popupIntID: 155,
 		setup: null,
 	},
@@ -711,7 +725,6 @@ const TRIAL_PAGES = [
 		pageIntID: 37,
 		question: { id: "Q110", intID: 48 },
 		mainText: null,
-		fbTextIntID: 124,
 		popupIntID: 156,
 		setup: null,
 	},
@@ -721,7 +734,6 @@ const TRIAL_PAGES = [
 		pageIntID: 54,
 		question: { id: "Q206", intID: 65 },
 		mainText: null,
-		fbTextIntID: 125,
 		popupIntID: 157,
 		setup: null,
 	},
@@ -731,7 +743,6 @@ const TRIAL_PAGES = [
 		pageIntID: 55,
 		question: { id: "Q202", intID: 59 },
 		mainText: null,
-		fbTextIntID: 126,
 		popupIntID: 158,
 		setup: null,
 	},
@@ -741,7 +752,6 @@ const TRIAL_PAGES = [
 		pageIntID: 56,
 		question: { id: "Q208", intID: 67 },
 		mainText: null,
-		fbTextIntID: 127,
 		popupIntID: 159,
 		setup: null,
 	},
@@ -751,7 +761,6 @@ const TRIAL_PAGES = [
 		pageIntID: 57,
 		question: { id: "Q204", intID: 60 },
 		mainText: null,
-		fbTextIntID: 128,
 		popupIntID: 160,
 		setup: null,
 	},
@@ -761,7 +770,6 @@ const TRIAL_PAGES = [
 		pageIntID: 58,
 		question: { id: "Q210", intID: 69 },
 		mainText: null,
-		fbTextIntID: 129,
 		popupIntID: 161,
 		setup: null,
 	},
@@ -776,6 +784,8 @@ function setupPhp({
 	type,
 	intID,
 	varName,
+	userVarName,
+	targetVarName,
 	maxMm,
 	goalMm,
 	answer,
@@ -785,12 +795,14 @@ function setupPhp({
 }) {
 	const replacements = {
 		measure: `
-$var    = '${varName}';
-$maxMm  = ${maxMm ?? 500};
-$goalMm = ${goalMm ?? 150};
-replace('%var%',    $var);
-replace('%maxMm%',  $maxMm);
-replace('%goalMm%', $goalMm);`,
+$answerVar = '${userVarName ?? varName}';
+$targetVar = '${targetVarName ?? `${varName}_target`}';
+$maxMm     = ${maxMm ?? 500};
+$goalMm    = ${goalMm ?? "''"};
+replace('%userVar%',   $answerVar);
+replace('%targetVar%', $targetVar);
+replace('%maxMm%',     $maxMm);
+replace('%goalMm%',    $goalMm);`,
 
 		geo: `
 $answer  = '${answer}';
@@ -821,45 +833,9 @@ function universalPopupPhp(pageIdent, popupIntID, needAnswer) {
 		`
 $pageIdent = '${pageIdent}';
 
-if (!isset($popup_template)) {
-	$popup_template = '';
-}
+$ctx = fopra_popup_context($pageIdent, $freq_pages, $nonf_pages);
+$html = fopra_popup_html(${needAnswer ? "true" : "false"}, $ctx['showPopup'], $ctx['points'], $ctx['suffix']);
 
-$replacements = array(
-	'__NEED_ANSWER__' => ${needAnswer ? "'true'" : "'false'"},
-	'__BODY_SUFFIX__' => '',
-	'__SHOW_POPUP__' => 'false',
-	'__POINTS__' => '0'
-);
-
-$freqIndex = array_search($pageIdent, $freq_pages, true);
-if ($freqIndex !== false) {
-  $trialNum = $freqIndex + 1;
-  $points   = value(id('V103', $trialNum));
-	$replacements['__BODY_SUFFIX__'] = 'this round!';
-	$replacements['__SHOW_POPUP__'] = 'true';
-	$replacements['__POINTS__'] = (string)$points;
-} else {
-  $nonfIndex = array_search($pageIdent, $nonf_pages, true);
-  if ($nonfIndex !== false) {
-    $trialNum = $nonfIndex + 1;
-		$showPopup = ($trialNum > 0 && $trialNum % 4 === 0);
-		$points = 0;
-    if ($trialNum > 0 && $trialNum % 4 === 0) {
-      $index  = $trialNum / 4;
-      $points = value(id('V104', $index));
-    }
-		$replacements['__BODY_SUFFIX__'] = 'over the last 4 rounds!';
-		if ($showPopup) {
-			$replacements['__SHOW_POPUP__'] = 'true';
-		} else {
-			$replacements['__SHOW_POPUP__'] = 'false';
-		}
-		$replacements['__POINTS__'] = (string)$points;
-  }
-}
-
-$html = str_replace(array_keys($replacements), array_values($replacements), $popup_template);
 html($html);`.trim(),
 	);
 }
@@ -871,7 +847,6 @@ function trialPage(trial, pageNumber) {
 		trial.setup && setupPhp(trial.setup),
 		`<question id="${trial.question.id}" intID="${trial.question.intID}" />`,
 		trial.mainText && textTag(trial.mainText.id, trial.mainText.intID),
-		trial.fbTextIntID !== null && textTag("FB01", trial.fbTextIntID),
 		universalPopupPhp(trial.ident, trial.popupIntID, trial.kind === "standard"),
 		`</page>`,
 	];
@@ -933,9 +908,14 @@ ${phpTag(3, RANDOMISATION_PHP)}
 
 const overwrite = process.argv.includes("--overwrite");
 const outputPath = overwrite ? PATHS.overwrite : PATHS.default;
+const phpOutputPath = overwrite ? PHP_PATHS.overwrite : PHP_PATHS.default;
 
 fs.writeFileSync(outputPath, buildXml(), "utf8");
+fs.writeFileSync(phpOutputPath, buildPhpFunctionsFile(), "utf8");
 console.log(`Generated questionnaire XML at: ${outputPath}`);
+console.log(`Generated PHP functions file at: ${phpOutputPath}`);
 if (!overwrite) {
-	console.log("Use --overwrite to replace Questionare.xml directly.");
+	console.log(
+		"Use --overwrite to replace Questionare.xml and Questionare.functions.php directly.",
+	);
 }
