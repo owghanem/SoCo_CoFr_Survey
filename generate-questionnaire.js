@@ -135,7 +135,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		Array.prototype.forEach.call(areas, function (area) {
 			area.addEventListener("pointerdown", syncNextState, true);
 			area.addEventListener("mousedown", syncNextState, true);
-			area.addEventListener("touchstart", syncNextState, true);
+			area.addEventListener("touchstart", syncNextState, { capture: true, passive: true });
 			area.addEventListener("keydown", syncNextState, true);
 
 			area.addEventListener("pointerup", function () {
@@ -335,11 +335,14 @@ if (!isset($freq_pages) || !isset($nonf_pages) || !isset($points_freq) || !isset
   shuffle($freq_pages);
   shuffle($nonf_pages);
 
-  $points_freq = array(7, 8, 8, 7, 10, 5, 9, 6, 8, 7, 9, 6, 10, 5, 8, 7);
-  $points_nonfreq = array(30, 25, 35, 30);
+  $points_total = 120;
+  $points_freq = fopra_broken_stick_points(16, 5, 10, $points_total, 5000);
+  $points_nonfreq = fopra_broken_stick_points(4, 20, 40, $points_total, 5000);
 
-  shuffle($points_freq);
-  shuffle($points_nonfreq);
+  if (count($points_freq) !== 16 || count($points_nonfreq) !== 4) {
+    $points_freq = array(7, 8, 8, 7, 10, 5, 9, 6, 8, 7, 9, 6, 10, 5, 8, 7);
+    $points_nonfreq = array(30, 25, 35, 30);
+  }
 
   registerVariable($freq_pages);
   registerVariable($nonf_pages);
@@ -389,6 +392,44 @@ if ($condition == 1) {
 
 function buildPhpFunctionsFile() {
 	return `
+function fopra_broken_stick_points($count, $minVal, $maxVal, $total, $maxAttempts) {
+	$base = $count * $minVal;
+	$extraTotal = $total - $base;
+	$extraMax = $maxVal - $minVal;
+
+	if ($extraTotal < 0 || $extraTotal > ($count * $extraMax)) {
+		return array();
+	}
+
+	$attempts = 0;
+	while ($attempts < $maxAttempts) {
+		$attempts++;
+		$cuts = array(0, $extraTotal);
+
+		for ($j = 0; $j < $count - 1; $j++) {
+			$cuts[] = mt_rand(0, $extraTotal);
+		}
+		sort($cuts, SORT_NUMERIC);
+
+		$parts = array();
+		$ok = true;
+		for ($j = 1; $j < count($cuts); $j++) {
+			$piece = $cuts[$j] - $cuts[$j - 1];
+			if ($piece > $extraMax) {
+				$ok = false;
+				break;
+			}
+			$parts[] = $piece + $minVal;
+		}
+
+		if ($ok && count($parts) === $count) {
+			return $parts;
+		}
+	}
+
+	return array();
+}
+
 function fopra_popup_template() {
 	return ${phpSingleQuotedString(POPUP_TEMPLATE_JS)};
 }
@@ -784,7 +825,9 @@ function setupPhp({
 	type,
 	intID,
 	varName,
+	resultVarName,
 	userVarName,
+	answerVarName,
 	targetVarName,
 	maxMm,
 	goalMm,
@@ -806,7 +849,9 @@ replace('%goalMm%',    $goalMm);`,
 
 		geo: `
 $answer  = '${answer}';
-$var     = '${varName}';
+$resultVar = '${resultVarName ?? varName}';
+$answerVar = '${answerVarName ?? `${resultVarName ?? varName}_answer`}';
+$targetVar = '${targetVarName ?? `${resultVarName ?? varName}_target`}';
 $lat     = '${lat}';
 $lng     = '${lng}';
 $api_key = '${GOOGLE_API_KEY}';
@@ -814,7 +859,9 @@ replace('%api_key%', $api_key);
 replace('%lat%',     $lat);
 replace('%lng%',     $lng);
 replace('%answer%',  $answer);
-replace('%var%',     $var);`,
+replace('%result_var%', $resultVar);
+replace('%answer_var%', $answerVar);
+replace('%target_var%', $targetVar);`,
 
 		shape: `
 $img = '${img}';

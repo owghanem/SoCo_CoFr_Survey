@@ -211,7 +211,7 @@
 			return px;
 		}
 
-		console.log("Calculated px/cm:", getPixelsPerCm());
+		// console.log("Calculated px/cm:", getPixelsPerCm());
 
 		const pixelsPerCm = getPixelsPerCm();
 		const maxMm = parseFloat("%maxMm%") || 500; // Default to 500mm if not set
@@ -286,7 +286,7 @@
 				soSciInput.value = mm;
 
 				// LOGGING FOR VERIFICATION
-				console.log(`Current raw pixels: ${newPixels.toFixed(2)}, Calculated mm: ${mm}mm`);
+				// console.log(`Current raw pixels: ${newPixels.toFixed(2)}, Calculated mm: ${mm}mm`);
 
 				const nextButton = getNextButton();
 				if (nextButton) nextButton.disabled = false;

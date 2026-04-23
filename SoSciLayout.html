@@ -53,23 +53,25 @@ div#s2t-progress {
 }
 div#S2Logos {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    /*padding: 0.8rem 1.6rem;*/
+    height: 11vh;
 }
-div#S2Logos img {
-    max-height: 12vh;
+img.s2-logo {
+    height: inherit !important;
+}
+div#S2Logos img,
+div#addtional_logos img {
+    height: clamp(32px, 6vh, 64px);
     width: auto;
+    max-width: min(32vw, 180px);
+    object-fit: contain;
 }
 
 div#addtional_logos {
     display: flex;
     align-items: center;
-}
-
-div#addtional_logos img {
-    padding: 1rem;
-    max-width: 15vw;
-    max-height: 8vh;
+    gap: 0.4rem 0.8rem;
 }
 
 img.s2headerImage {
@@ -126,9 +128,6 @@ div#s2t-footer a {
 
 div#s2t-footer a:hover {
     color: #50aadc;
-}
-
-div#s2t-imprint {
 }
 
 /* Center header and footer on smartphone */
@@ -198,6 +197,11 @@ div.buttonControl input.button {
     padding-top: 6px;
     padding-bottom: 6px;
     border-radius: 0.3em;
+}
+
+input[type="text"],
+input[type="number"] {
+    text-align: left!important;
 }
 
 input[type="radio"] {
@@ -346,6 +350,100 @@ div.spacingV {
 }
 div.question div.opener {
     margin-bottom: 0.25em;
+}
+
+/* Mobile: statement full width, options below */
+@media (max-width: 768px) {
+  .items table.question.fullwidth {
+    width: 100%;
+    min-width: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .items table.question.fullwidth colgroup,
+  .items table.question.fullwidth tr.s2header {
+    display: none;
+  }
+
+  .items table.question.fullwidth tbody,
+  .items table.question.fullwidth tr.s2item,
+  .items table.question.fullwidth td {
+    display: block;
+    width: auto;
+  }
+
+  .items table.question.fullwidth tr.s2item {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 0 1rem 0;
+    padding: 0.75rem 0.6rem;
+    border: 1px solid #d7d7d7;
+    border-radius: 0.5rem;
+    background: var(--s2color0, #fff);
+  }
+
+  .items table.question.fullwidth tr.s2item.shadeH0,
+  .items table.question.fullwidth tr.s2item.shadeH1,
+  .items table.question.fullwidth tr.s2item.shadeH0 td,
+  .items table.question.fullwidth tr.s2item.shadeH1 td {
+    background: var(--s2color0, #fff);
+  }
+
+  .items table.question.fullwidth tr.s2item td.itemtext {
+    flex: 0 0 100%;
+    width: 100% !important;
+    max-width: none;
+    margin: 0 0 0.6rem 0;
+    padding: 0 !important;
+    border: 0;
+    white-space: normal;
+    font-weight: 500;
+  }
+
+  .items table.question.fullwidth tr.s2item td.scale {
+    display: flex;
+    flex: 0 0 calc(100% / 7);
+    max-width: calc(100% / 7);
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0.2rem 0 1rem 0 !important;
+  }
+
+  .items table.question.fullwidth tr.s2item td.scale input[type="radio"] {
+    width: 1.4em;
+    height: 1.4em;
+  }
+
+  .items table.question.fullwidth tr.s2item td.scale.s2col2::after,
+  .items table.question.fullwidth tr.s2item td.scale.s2col5::after,
+  .items table.question.fullwidth tr.s2item td.scale.s2col8::after {
+    display: block;
+    position: absolute;
+    bottom: -0.2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.8rem;
+    line-height: 1;
+    color: #666;
+    white-space: nowrap;
+    z-index: 1;
+  }
+
+  .items table.question.fullwidth tr.s2item td.scale.s2col2::after {
+    content: "Low";
+  }
+
+  .items table.question.fullwidth tr.s2item td.scale.s2col5::after {
+    content: "Average";
+  }
+
+  .items table.question.fullwidth tr.s2item td.scale.s2col8::after {
+    content: "High";
+  }
 }
 </style>
 

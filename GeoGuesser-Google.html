@@ -130,7 +130,8 @@
         script.src =
             "https://maps.googleapis.com/maps/api/js" +
             "?key=" + "%api_key%" +
-            "&callback=initStreetView";
+            "&callback=initStreetView" +
+            "&loading=async";
         script.async = true;
         script.defer = true;
         document.head.appendChild(script);
@@ -142,9 +143,11 @@
         if (nextButton) nextButton.disabled = true;
     });
 
+    const resultVarID = "%result_var%";
+    const answerVarID = "%answer_var%";
+    const targetVarID = "%target_var%";
+    
     const targetCountry = "%answer%";
-    const variableID = "%var%";
-
     let selectedCountry = "";
     let geoLayer;
 
@@ -181,14 +184,22 @@
                                 ? 1
                                 : 0;
 
-                        console.log(
-                            "Selected:", selectedCountry,
-                            "Target:", targetCountry,
-                            "Correct?", isCorrect
-                        );
+                        // console.log(
+                        //    "Selected:", selectedCountry,
+                        //    "Target:", targetCountry,
+                        //    "Correct?", isCorrect
+                        //);
 
-                        const varElement = document.getElementById(variableID);
-                        if (varElement) varElement.value = isCorrect;
+                        const resultElement = document.getElementById(resultVarID);
+                        if (resultElement) resultElement.value = isCorrect;
+
+                        const answerElement = document.getElementById(answerVarID);
+                        answerElement.value = selectedCountry
+
+                        const targetElement = document.getElementById(targetVarID);
+                        targetElement.value = targetCountry
+
+
 
                         const nextButton = getNextButton();
                         if (nextButton) nextButton.disabled = false;

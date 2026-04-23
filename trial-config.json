@@ -19,25 +19,33 @@
 	},
 	"geo": {
 		"G1": {
-			"varName": "G101_01",
+			"resultVarName": "G101_01",
+			"answerVarName": "G101_05",
+			"targetVarName": "G101_06",
 			"answer": "United States of America",
 			"lat": "32.0117548",
 			"lng": "-93.9271803"
 		},
 		"G2": {
-			"varName": "G101_02",
+			"resultVarName": "G101_02",
+			"answerVarName": "G101_07",
+			"targetVarName": "G101_08",
 			"answer": "Greece",
 			"lat": "37.6047259",
 			"lng": "23.3298282"
 		},
 		"G3": {
-			"varName": "G101_03",
+			"resultVarName": "G101_03",
+			"answerVarName": "G101_09",
+			"targetVarName": "G101_10",
 			"answer": "Canada",
 			"lat": "53.1995399",
 			"lng": "-105.3321598"
 		},
 		"G4": {
-			"varName": "G101_04",
+			"resultVarName": "G101_04",
+			"answerVarName": "G101_11",
+			"targetVarName": "G101_12",
 			"answer": "Uruguay",
 			"lat": "-30.4625891",
 			"lng": "-56.9016809"

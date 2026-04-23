@@ -109,9 +109,9 @@
     canvas.addEventListener('mousemove', moveCut);
     canvas.addEventListener('mouseup', endCut);
     // Touch events for mobile/tablet support
-    canvas.addEventListener('touchstart', (e) => startCut(getTouchPos(e)));
-    canvas.addEventListener('touchmove', (e) => moveCut(getTouchPos(e)));
-    canvas.addEventListener('touchend', (e) => endCut());
+    canvas.addEventListener('touchstart', (e) => startCut(getTouchPos(e)), { passive: false });
+    canvas.addEventListener('touchmove', (e) => moveCut(getTouchPos(e)), { passive: false });
+    canvas.addEventListener('touchend', (e) => endCut(), { passive: true });
 
     document.getElementById('resetBtn').addEventListener('click', () => {
         startPoint = null; 
@@ -229,7 +229,7 @@
         const accuracy = Math.round((smallerPortion / 0.5) * 100);
 
         // 5. Save to SoSci Variables
-        console.log(`Split: ${Math.round(portion1*100)}/${Math.round(portion2*100)}, Score: ${accuracy}`);
+        // console.log(`Split: ${Math.round(portion1*100)}/${Math.round(portion2*100)}, Score: ${accuracy}`);
         
         if(resultInput) {
             resultInput.value = portion1;

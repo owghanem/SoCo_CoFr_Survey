@@ -76,7 +76,7 @@
 
 	// 1. SET THE TARGET
 	const targetCountry = "%answer%";
-    const variableID = "%var%";
+    const resultVarID = "%result_var%";
 
 	let selectedCountry = "";
 	let geoLayer;
@@ -118,9 +118,9 @@
 						console.log("Selected:", selectedCountry, "Target:", targetCountry, "Correct?", isCorrect);
 
 						// SAVE TO SOSCI
-						const varElement = document.getElementById(variableID);
-						if (varElement) {
-							varElement.value = isCorrect;
+						const resultElement = document.getElementById(resultVarID);
+						if (resultElement) {
+							resultElement.value = isCorrect;
 						}
 
 						// Enable Next button
