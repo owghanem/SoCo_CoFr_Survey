@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-16%2B-green.svg)](https://nodejs.org/)
 [![SoSci Survey](https://img.shields.io/badge/Platform-SoSci%20Survey-orange.svg)](https://www.soscisurvey.de/)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.placeholder.svg)](https://github.com/owghanem/FoPra)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.placeholder.svg)](https://github.com/owghanem/SoCo_CoFr_Survey)
 
 This repository contains the interactive experimental tasks, PHP backend logic, layout templates, and an automated XML questionnaire compiler for **SoSci Survey**. It was developed for a social cognition research study (*Forschungspraktikum*) investigating the **Monitoring Frequency Effect (MFE)**, feedback timing, and their downstream consequences on perceived performance and intrinsic motivation.
 
@@ -103,8 +103,8 @@ The study features three distinct interactive challenges embedded into SoSci Sur
 
 ### Clone the Repository
 ```bash
-git clone https://github.com/owghanem/FoPra.git
-cd FoPra/questionare_sosci
+git clone https://github.com/owghanem/SoCo_CoFr_Survey.git
+cd SoCo_CoFr_Survey
 ```
 
 ### Environment Configuration
@@ -190,11 +190,11 @@ If you use this repository, the experimental mini-games, or the questionnaire ge
 
 ### BibTeX
 ```bibtex
-@software{ghanem2026fopra,
+@software{ghanem2026sococofrsurvey,
   author = {Ghanem, Omar},
   title = {{FoPra: Interactive Tasks and Questionnaire Generator for SoSci Survey}},
   year = {2026},
-  url = {https://github.com/owghanem/FoPra},
+  url = {https://github.com/owghanem/SoCo_CoFr_Survey},
   version = {1.0.0}
 }
 ```

@@ -15,5 +15,10 @@
     "interactive-tasks"
   ],
   "author": "Omar Ghanem <o.w.m.ghanem@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/owghanem/SoCo_CoFr_Survey.git"
+  },
+  "homepage": "https://github.com/owghanem/SoCo_CoFr_Survey#readme"
 }
