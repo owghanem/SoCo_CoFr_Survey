@@ -1,6 +1,16 @@
+# Environment and secrets
 .env
-generate-questionnaire-temp.js
-Questionare.generated.xml
-Questionare.xml
-.Rproj.user
 
+# Generated questionnaire build outputs
+*.generated.*
+survey/*.generated.*
+
+# Dependencies & system files
+node_modules/
+.DS_Store
+Thumbs.db
+
+# IDE & workspace files
+.Rproj.user
+.vscode/
+.idea/

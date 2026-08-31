@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this software or experimental materials in your research, please cite it using the metadata below."
+type: software
+title: "FoPra: Interactive Tasks and Questionnaire Generator for SoSci Survey"
+abstract: >-
+  An open-source experimental framework and automated SoSci Survey questionnaire
+  generator designed for investigating the Monitoring Frequency Effect (MFE),
+  feedback timing, and intrinsic motivation. Includes interactive browser-based
+  mini-game tasks (Blind Tape Measure, Shape Slicing, Geolocation Guessing),
+  custom layout styling, randomized broken-stick point distribution algorithms,
+  and dynamic feedback popups.
+authors:
+  - family-names: Ghanem
+    given-names: Omar
+    email: o.w.m.ghanem@gmail.com
+repository-code: "https://github.com/owghanem/FoPra"
+url: "https://github.com/owghanem/FoPra"
+keywords:
+  - sosci-survey
+  - experimental-psychology
+  - monitoring-frequency-effect
+  - intrinsic-motivation
+  - gamified-tasks
+  - social-cognition
+  - behavioral-research
+license: MIT
+version: 1.0.0
+date-released: "2026-08-31"

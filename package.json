@@ -1,0 +1,19 @@
+{
+  "name": "fopra-questionnaire-sosci",
+  "version": "1.0.0",
+  "description": "Interactive tasks and SoSci Survey questionnaire generator for research on monitoring frequency and motivation",
+  "main": "scripts/generate-questionnaire.js",
+  "scripts": {
+    "generate": "node scripts/generate-questionnaire.js",
+    "build": "node scripts/generate-questionnaire.js --overwrite"
+  },
+  "keywords": [
+    "sosci-survey",
+    "psychology-experiment",
+    "monitoring-frequency-effect",
+    "gamification",
+    "interactive-tasks"
+  ],
+  "author": "Omar Ghanem <o.w.m.ghanem@gmail.com>",
+  "license": "MIT"
+}

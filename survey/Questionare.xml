@@ -92,11 +92,14 @@ if (!isset($freq_pages) || !isset($nonf_pages) || !isset($points_freq) || !isset
   shuffle($freq_pages);
   shuffle($nonf_pages);
 
-  $points_freq = array(7, 8, 8, 7, 10, 5, 9, 6, 8, 7, 9, 6, 10, 5, 8, 7);
-  $points_nonfreq = array(30, 25, 35, 30);
+  $points_total = 120;
+  $points_freq = fopra_broken_stick_points(16, 5, 10, $points_total, 5000);
+  $points_nonfreq = fopra_broken_stick_points(4, 20, 40, $points_total, 5000);
 
-  shuffle($points_freq);
-  shuffle($points_nonfreq);
+  if (count($points_freq) !== 16 || count($points_nonfreq) !== 4) {
+    $points_freq = array(7, 8, 8, 7, 10, 5, 9, 6, 8, 7, 9, 6, 10, 5, 8, 7);
+    $points_nonfreq = array(30, 25, 35, 30);
+  }
 
   registerVariable($freq_pages);
   registerVariable($nonf_pages);
@@ -258,15 +261,19 @@ html($html);
 <page ident="G1" intID="5">
 <php intID="26"><![CDATA[
 $answer  = 'United States of America';
-$var     = 'G101_01';
+$resultVar = 'G101_01';
+$answerVar = 'G101_05';
+$targetVar = 'G101_06';
 $lat     = '32.0117548';
 $lng     = '-93.9271803';
-$api_key = 'AIzaSyBH4b_fqRO3u5GO_AtdXM2SNt_SW1TKdjw';
+$api_key = 'YOUR_GOOGLE_MAPS_API_KEY';
 replace('%api_key%', $api_key);
 replace('%lat%',     $lat);
 replace('%lng%',     $lng);
 replace('%answer%',  $answer);
-replace('%var%',     $var);
+replace('%result_var%', $resultVar);
+replace('%answer_var%', $answerVar);
+replace('%target_var%', $targetVar);
 ]]></php>
 <question id="G101" intID="11" />
 <text id="GG01" intID="18">
@@ -287,15 +294,19 @@ html($html);
 <page ident="G2" intID="82">
 <php intID="83"><![CDATA[
 $answer  = 'Greece';
-$var     = 'G101_02';
+$resultVar = 'G101_02';
+$answerVar = 'G101_07';
+$targetVar = 'G101_08';
 $lat     = '37.6047259';
 $lng     = '23.3298282';
-$api_key = 'AIzaSyBH4b_fqRO3u5GO_AtdXM2SNt_SW1TKdjw';
+$api_key = 'YOUR_GOOGLE_MAPS_API_KEY';
 replace('%api_key%', $api_key);
 replace('%lat%',     $lat);
 replace('%lng%',     $lng);
 replace('%answer%',  $answer);
-replace('%var%',     $var);
+replace('%result_var%', $resultVar);
+replace('%answer_var%', $answerVar);
+replace('%target_var%', $targetVar);
 ]]></php>
 <question id="G101" intID="84" />
 <text id="GG01" intID="85">
@@ -316,15 +327,19 @@ html($html);
 <page ident="G3" intID="86">
 <php intID="87"><![CDATA[
 $answer  = 'Canada';
-$var     = 'G101_03';
+$resultVar = 'G101_03';
+$answerVar = 'G101_09';
+$targetVar = 'G101_10';
 $lat     = '53.1995399';
 $lng     = '-105.3321598';
-$api_key = 'AIzaSyBH4b_fqRO3u5GO_AtdXM2SNt_SW1TKdjw';
+$api_key = 'YOUR_GOOGLE_MAPS_API_KEY';
 replace('%api_key%', $api_key);
 replace('%lat%',     $lat);
 replace('%lng%',     $lng);
 replace('%answer%',  $answer);
-replace('%var%',     $var);
+replace('%result_var%', $resultVar);
+replace('%answer_var%', $answerVar);
+replace('%target_var%', $targetVar);
 ]]></php>
 <question id="G101" intID="88" />
 <text id="GG01" intID="89">
@@ -345,15 +360,19 @@ html($html);
 <page ident="G4" intID="90">
 <php intID="91"><![CDATA[
 $answer  = 'Uruguay';
-$var     = 'G101_04';
+$resultVar = 'G101_04';
+$answerVar = 'G101_11';
+$targetVar = 'G101_12';
 $lat     = '-30.4625891';
 $lng     = '-56.9016809';
-$api_key = 'AIzaSyBH4b_fqRO3u5GO_AtdXM2SNt_SW1TKdjw';
+$api_key = 'YOUR_GOOGLE_MAPS_API_KEY';
 replace('%api_key%', $api_key);
 replace('%lat%',     $lat);
 replace('%lng%',     $lng);
 replace('%answer%',  $answer);
-replace('%var%',     $var);
+replace('%result_var%', $resultVar);
+replace('%answer_var%', $answerVar);
+replace('%target_var%', $targetVar);
 ]]></php>
 <question id="G101" intID="92" />
 <text id="GG01" intID="93">

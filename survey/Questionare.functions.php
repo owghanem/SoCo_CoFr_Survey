@@ -1,4 +1,42 @@
 
+function fopra_broken_stick_points($count, $minVal, $maxVal, $total, $maxAttempts) {
+	$base = $count * $minVal;
+	$extraTotal = $total - $base;
+	$extraMax = $maxVal - $minVal;
+
+	if ($extraTotal < 0 || $extraTotal > ($count * $extraMax)) {
+		return array();
+	}
+
+	$attempts = 0;
+	while ($attempts < $maxAttempts) {
+		$attempts++;
+		$cuts = array(0, $extraTotal);
+
+		for ($j = 0; $j < $count - 1; $j++) {
+			$cuts[] = mt_rand(0, $extraTotal);
+		}
+		sort($cuts, SORT_NUMERIC);
+
+		$parts = array();
+		$ok = true;
+		for ($j = 1; $j < count($cuts); $j++) {
+			$piece = $cuts[$j] - $cuts[$j - 1];
+			if ($piece > $extraMax) {
+				$ok = false;
+				break;
+			}
+			$parts[] = $piece + $minVal;
+		}
+
+		if ($ok && count($parts) === $count) {
+			return $parts;
+		}
+	}
+
+	return array();
+}
+
 function fopra_popup_template() {
 	return '<script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -61,7 +99,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		Array.prototype.forEach.call(areas, function (area) {
 			area.addEventListener("pointerdown", syncNextState, true);
 			area.addEventListener("mousedown", syncNextState, true);
-			area.addEventListener("touchstart", syncNextState, true);
+			area.addEventListener("touchstart", syncNextState, { capture: true, passive: true });
 			area.addEventListener("keydown", syncNextState, true);
 
 			area.addEventListener("pointerup", function () {

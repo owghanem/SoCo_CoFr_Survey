@@ -3,42 +3,59 @@
 const fs = require("fs");
 const path = require("path");
 
+const ROOT_DIR = path.resolve(__dirname, "..");
+
 const PATHS = {
-	default: path.join(__dirname, "Questionare.generated.xml"),
-	overwrite: path.join(__dirname, "Questionare.xml"),
+	default: path.join(ROOT_DIR, "survey", "Questionare.generated.xml"),
+	overwrite: path.join(ROOT_DIR, "survey", "Questionare.xml"),
 };
 
 const PHP_PATHS = {
-	default: path.join(__dirname, "Questionare.functions.generated.php"),
-	overwrite: path.join(__dirname, "Questionare.functions.php"),
+	default: path.join(ROOT_DIR, "survey", "Questionare.functions.generated.php"),
+	overwrite: path.join(ROOT_DIR, "survey", "Questionare.functions.php"),
 };
 
 function readEnvValue(key) {
-	const envPath = path.join(__dirname, ".env");
-	if (!fs.existsSync(envPath)) return undefined;
+	if (process.env[key]) return process.env[key];
 
-	const envText = fs.readFileSync(envPath, "utf8");
-	const line = envText
-		.split(/\r?\n/)
-		.find((raw) => raw.trim().startsWith(`${key}=`));
+	const candidates = [
+		path.join(ROOT_DIR, ".env"),
+		path.join(__dirname, ".env"),
+	];
 
-	if (!line) return undefined;
-	const rawValue = line.slice(line.indexOf("=") + 1).trim();
+	for (const envPath of candidates) {
+		if (fs.existsSync(envPath)) {
+			const envText = fs.readFileSync(envPath, "utf8");
+			const line = envText
+				.split(/\r?\n/)
+				.find((raw) => raw.trim().startsWith(`${key}=`));
 
-	if (
-		(rawValue.startsWith('"') && rawValue.endsWith('"')) ||
-		(rawValue.startsWith("'") && rawValue.endsWith("'"))
-	) {
-		return rawValue.slice(1, -1);
+			if (line) {
+				const rawValue = line.slice(line.indexOf("=") + 1).trim();
+				if (
+					(rawValue.startsWith('"') && rawValue.endsWith('"')) ||
+					(rawValue.startsWith("'") && rawValue.endsWith("'"))
+				) {
+					return rawValue.slice(1, -1);
+				}
+				return rawValue;
+			}
+		}
 	}
 
-	return rawValue;
+	return undefined;
 }
 
 const GOOGLE_API_KEY =
-	readEnvValue("API_KEY") || readEnvValue("GOOGLE_API_KEY") || "";
+	readEnvValue("API_KEY") ||
+	readEnvValue("GOOGLE_API_KEY") ||
+	"YOUR_GOOGLE_MAPS_API_KEY";
 
-const TRIAL_CONFIG_PATH = path.join(__dirname, "trial-config.json");
+const TRIAL_CONFIG_PATH = fs.existsSync(
+	path.join(ROOT_DIR, "config", "trial-config.json"),
+)
+	? path.join(ROOT_DIR, "config", "trial-config.json")
+	: path.join(__dirname, "trial-config.json");
 const TRIAL_CONFIG = JSON.parse(fs.readFileSync(TRIAL_CONFIG_PATH, "utf8"));
 
 const INTRO_HTML = `<div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto;">
