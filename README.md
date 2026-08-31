@@ -191,8 +191,8 @@ If you use this repository, the experimental mini-games, or the questionnaire ge
 ### BibTeX
 ```bibtex
 @software{ghanem2026sococofrsurvey,
-  author = {Ghanem, Omar},
-  title = {{FoPra: Interactive Tasks and Questionnaire Generator for SoSci Survey}},
+  author = {Ghanem, Omar and Hasan, Eliz and Ioannisian, Diana and Shokri, Hasti and Vaz, Andr{\'e} and Weber, Florian},
+  title = {{SoCo\_CoFr\_Survey: Interactive Tasks and Questionnaire Generator for SoSci Survey}},
   year = {2026},
   url = {https://github.com/owghanem/SoCo_CoFr_Survey},
   version = {1.0.0}
@@ -201,7 +201,21 @@ If you use this repository, the experimental mini-games, or the questionnaire ge
 
 ---
 
-## License & Contributors
+## Authors & Contributors
 
-- **Author:** Omar Ghanem ([@owghanem](https://github.com/owghanem))
-- **License:** Distributed under the [MIT License](LICENSE).
+**Ruhr-Universität Bochum**
+
+- **Omar Ghanem** — [`Omar.Ghanem@edu.ruhr-uni-bochum.de`](mailto:Omar.Ghanem@edu.ruhr-uni-bochum.de) ([@owghanem](https://github.com/owghanem))
+- **Eliz Hasan** — [`Eliz.Hasan@edu.ruhr-uni-bochum.de`](mailto:Eliz.Hasan@edu.ruhr-uni-bochum.de)
+- **Diana Ioannisian** — [`Diana.Ioannisian@edu.ruhr-uni-bochum.de`](mailto:Diana.Ioannisian@edu.ruhr-uni-bochum.de)
+- **Hasti Shokri** — [`Hasti.Shokri@edu.ruhr-uni-bochum.de`](mailto:Hasti.Shokri@edu.ruhr-uni-bochum.de)
+
+**Project Tutors & Supervision:**
+- **Dr. André Vaz** — [`Andre.Vaz@ruhr-uni-bochum.de`](mailto:Andre.Vaz@ruhr-uni-bochum.de)
+- **Florian Weber** — [`Florian.Weber-i2r@ruhr-uni-bochum.de`](mailto:Florian.Weber-i2r@ruhr-uni-bochum.de)
+
+---
+
+## License
+
+Distributed under the [MIT License](LICENSE).

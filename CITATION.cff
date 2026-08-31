@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use this software or experimental materials in your research, please cite it using the metadata below."
 type: software
-title: "FoPra: Interactive Tasks and Questionnaire Generator for SoSci Survey"
+title: "SoCo_CoFr_Survey: Interactive Tasks and Questionnaire Generator for SoSci Survey"
 abstract: >-
   An open-source experimental framework and automated SoSci Survey questionnaire
   generator designed for investigating the Monitoring Frequency Effect (MFE),
@@ -12,7 +12,28 @@ abstract: >-
 authors:
   - family-names: Ghanem
     given-names: Omar
-    email: o.w.m.ghanem@gmail.com
+    email: Omar.Ghanem@edu.ruhr-uni-bochum.de
+    affiliation: Ruhr-Universität Bochum
+  - family-names: Hasan
+    given-names: Eliz
+    email: Eliz.Hasan@edu.ruhr-uni-bochum.de
+    affiliation: Ruhr-Universität Bochum
+  - family-names: Ioannisian
+    given-names: Diana
+    email: Diana.Ioannisian@edu.ruhr-uni-bochum.de
+    affiliation: Ruhr-Universität Bochum
+  - family-names: Shokri
+    given-names: Hasti
+    email: Hasti.Shokri@edu.ruhr-uni-bochum.de
+    affiliation: Ruhr-Universität Bochum
+  - family-names: Vaz
+    given-names: André
+    email: Andre.Vaz@ruhr-uni-bochum.de
+    affiliation: Ruhr-Universität Bochum
+  - family-names: Weber
+    given-names: Florian
+    email: Florian.Weber-i2r@ruhr-uni-bochum.de
+    affiliation: Ruhr-Universität Bochum
 repository-code: "https://github.com/owghanem/SoCo_CoFr_Survey"
 url: "https://github.com/owghanem/SoCo_CoFr_Survey"
 keywords:

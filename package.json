@@ -14,7 +14,14 @@
     "gamification",
     "interactive-tasks"
   ],
-  "author": "Omar Ghanem <o.w.m.ghanem@gmail.com>",
+  "author": "Omar Ghanem <Omar.Ghanem@edu.ruhr-uni-bochum.de>",
+  "contributors": [
+    "Eliz Hasan <Eliz.Hasan@edu.ruhr-uni-bochum.de>",
+    "Diana Ioannisian <Diana.Ioannisian@edu.ruhr-uni-bochum.de>",
+    "Hasti Shokri <Hasti.Shokri@edu.ruhr-uni-bochum.de>",
+    "André Vaz <Andre.Vaz@ruhr-uni-bochum.de>",
+    "Florian Weber <Florian.Weber-i2r@ruhr-uni-bochum.de>"
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
